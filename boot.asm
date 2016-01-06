@@ -56,7 +56,7 @@ print_string:
         ; Shown? - 1 bit
         ; Position in current pile - 5 bits
 
-        card dw 1111_0000_00_1_00010b
+        card dw 1011_1101_10_1_11001b
         dw 1111_0000_00_1_00010b
 
 	times 510-($-$$) db 0
