@@ -20,9 +20,43 @@
   mov ax, card
   call print_card
   ;call draw_board
-  jmp $
+	jmp loopy
+loopy:
+	mov ah, 0
+	int 16h
+	cmp al, 'd'
+	je main_draw
 
-; ---------------------------------------------------------------------------
+	cmp al, 'm'
+	je main_move
+
+	call print_invalid_op
+  jmp loopy
+
+print_invalid_op:
+	mov dl, 0d
+	mov dh, 0d
+	mov bl, 4d
+	mov bh, 0d
+	mov ah, 02h
+	int 10h
+
+	mov si, invalid_op
+  mov ah, 0Eh
+  .loop:
+      lodsb
+      cmp al, 0x00
+      je .done
+      int 10h
+      jmp .loop
+  .done:
+      ret
+
+main_draw:
+	jmp loopy
+
+main_move:
+	jmp loopy
 
 print_card:
   call fetch_card_value
@@ -219,7 +253,7 @@ line9:
 	jne line9
 	mov dh, 11d
 	mov dl, 90d
-	
+
 	;; the lines for bottom stacks are finished printing, now to invidually print each stack with
 	;; the proper number of facedown cards and the top card
 
@@ -260,8 +294,8 @@ findcard:
 	cmp bx, card + 52
 	je next_stack
 	jmp findcard
-	
-stackmatch:	
+
+stackmatch:
 	mov al, [bx+1]
 	and al, 00011111b
 	cmp al, cl
@@ -272,7 +306,7 @@ stackmatch:
 	je next_stack
 	jmp findcard
 
-cardmatch:	
+cardmatch:
 	mov ax, bx
 	call printcard
 	inc dh
@@ -285,20 +319,20 @@ next_stack:			;we have finished one stack, increment stack, if < 13 continue, el
 	cmp ch, eh
 	je finished
 	jmp findcard
-	
-finished:	
+
+finished:
 	pop dx
 	pop cx
 	pop bx
 	pop ax
 	ret
-	
+
 
   call print_char
   inc dl
   cmp dl, 7d
   jne .printdeck
-  popdx
+  pop dx
   ret
 
 ; ---------------------------------------------------------------------------
@@ -374,6 +408,8 @@ finished:
   dw 0000_1100_00_0_10100b
   dw 0000_1010_11_0_10101b
   dw 0000_1011_01_0_10110b
+
+				invalid_op db 'Invalid Operation', 0x00
 
   times 510-($-$$) db 0
   dw 0AA55h  ; Boot signature
