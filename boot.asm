@@ -19,7 +19,7 @@
   mov dl, 10d
   mov ax, card
   ;call print_card
-  call draw_board
+  call print_lower_stacks
 ;	jmp loopy
 
 loopy:
