@@ -25,38 +25,18 @@
 
 print_card:
 	call fetch_card_value
-	cmp cl, 10d
-	jg face_card
-	jl number_card
-print_card_done:
+	mov al, byte [fv+ecx]
+	call fetch_card_family
+	mov bl, byte [colors+ecx]
+	call print_char
+	mov al, byte [symbols+ecx]
+	inc dl
 	call print_char
 	ret
-face_card:
-	cmp cl, 11d
-	je jack
-
-	cmp cl, 12d
-	je queen
-
-	cmp cl, 13d
-	je king
-jack:
-	mov al, 'J'
-	jmp print_card_done
-queen:
-	mov al, 'Q'
-	jmp print_card_done
-king:
-	mov al, 'K'
-	jmp print_card_done
-number_card:
-	mov al, 'N'
-	jmp print_card_done
 
 print_char:
 	mov ah, 02h
 	mov bh, 0
-	mov bl, 5
 	int 10h
 	mov ah, 0Eh
 	int 10h
@@ -68,6 +48,7 @@ print_char:
 fetch_card_pile:
 	mov cl, byte [eax+1]
 	shr cl, 4
+	mov ch, 0
 	ret
 
 ; fetch_card_value
@@ -77,6 +58,7 @@ fetch_card_value:
 	mov cl, byte [eax+1]
 	shl cl, 4
 	shr cl, 4
+	mov ch, 0
 	ret
 
 ; fetch_card_family
@@ -85,6 +67,7 @@ fetch_card_value:
 fetch_card_family:
 	mov cl, byte [eax]
 	shr cl, 6
+	mov ch, 0
 	ret
 
 .data:
@@ -101,7 +84,9 @@ fetch_card_family:
         ; - First bit is the color (1=black, 0=red)
         ; Shown? - 1 bit
         ; Position in current pile - 5 bits
-
+				fv db ' A23456789TJQK'
+				colors db 7d, 7d, 4d, 4d
+				symbols db 'CSDH'
         card dw 1011_1101_10_1_11001b
         dw 1111_0000_00_1_00010b
 
