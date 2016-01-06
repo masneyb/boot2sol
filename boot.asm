@@ -41,10 +41,7 @@ print_string:
 .done:
 	ret
 
-	times 510-($-$$) db 0
-	dw 0AA55h	; Boot signature
-
-section .data
+.data
         ; Family - 2 bits
         ; - 1 1 spade
         ; - 1 0 club
@@ -61,3 +58,5 @@ section .data
         card dw 11_1000_0000_1_00010b
         dw 11_0010_1000_0_00001b
 
+	times 510-($-$$) db 0
+	dw 0AA55h	; Boot signature
