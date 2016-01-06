@@ -9,7 +9,7 @@ _start:
 	;mov [card], byte 00_00_1101b
 
 	mov eax, card
-	call fetch_card_family
+	call fetch_card_pile_pos
 
 	mov eax, 1
 	mov bl, dl
@@ -40,10 +40,28 @@ fetch_card_family:
 	shr dl, 6
 	ret
 
+; fetch_card_shown
+; - eax - input - address of card 
+; - dl - output - card shown
+fetch_card_shown:
+	mov dl, byte [eax]
+	shl dl, 2
+	shr dl, 7
+	ret
+
+; fetch_card_pile_pos
+; - eax - input - address of card 
+; - dl - output - card shown
+fetch_card_pile_pos
+	mov dl, byte [eax]
+	shl dl, 3
+	shr dl, 3
+	ret
+
 section .data
         ; Pile - 4 bits
         ; - 0-6 top row piles (2 is always empty)
-        ; Card - 4 bits
+        ; Value - 4 bits
         ; - A=1, 2, 3-10, J=11, Q=12, K=13
         ; Family - 2 bits
         ; - 1 1 spade
