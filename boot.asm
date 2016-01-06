@@ -32,5 +32,23 @@ print_char:
 	int 10h
 	ret
 
+.data
+        ; Pile - 4 bits
+        ; - 0-6 top row piles (2 is always empty)
+        ; Card - 4 bits
+        ; - A=1, 2, 3-10, J=11, Q=12, K=13
+        
+        ; Family - 2 bits
+        ; - 1 1 spade
+        ; - 1 0 club
+        ; - 0 1 heart
+        ; - 0 0 diamond
+        ; - First bit is the color (1=black, 0=red)
+        ; Shown? - 1 bit
+        ; Position in current pile - 5 bits
+
+        card dw 1111_0000_00_1_00010b
+        dw 1111_0000_00_1_00010b
+
 	times 510-($-$$) db 0
 	dw 0AA55h	; Boot signature
