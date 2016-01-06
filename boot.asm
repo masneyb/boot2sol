@@ -115,23 +115,7 @@ fetch_card_pile_pos:
 
 ; ---------------------------------------------------------------------------
 
-draw_board:
-  push dx
-  mov dh, 10d
-  mov dl, 0d
-
-.printdeck:
-	call print_char
-	inc dl
-	cmp dl, 7d
-	jne .printdeck
-
-.print_bottom_piles:
-	mov dh, 11d
-	mov dl, 0d
-	mov al, '|'
-
-print_stack_7:
+	;; print the stacks
 	;; this needs to do the following:
 	;; search for card that belongs in the current position of this deck (looping from 0-?)
 	;; two modes:
@@ -143,9 +127,6 @@ print_stack_7:
 	;; 	This will simply print the next cards value (King of Spades)
 	;; 	They should be printed one on top of the other
 	;; as this subroutine will be used 7 times make sure it can be called for each stack
-
-	pop dx
-	ret
 print_lower_stacks:
 	push ax
 	push bx
