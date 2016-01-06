@@ -71,7 +71,7 @@ print_card:
   mov al, byte [symbols+ecx]
   inc dl
   call print_char
-  popa 
+  popa
   ret
 
 print_char:
@@ -169,8 +169,10 @@ cardmatch:
 next_stack:			;we have finished one stack, increment stack, if < 13 continue, else done
 	inc ch
 	cmp ch, 00001101b
-	mov cl, 0d
 	je finished
+	mov cl, 0d
+	add dl, 4d
+	mov dh, 11d
 	jmp findcard
 
 finished:
