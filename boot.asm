@@ -16,12 +16,42 @@
 	mov al, 12h	; 12h = G  80x30  8x16  640x480   16/256K  .   A000 VGA,ATI VIP
 	int 10h		; Call BIOS
 
-
 	mov dh, 5d
 	mov dl, 10d
-	mov al, 'H'
-	call print_char
+	mov ax, card
+ 	call print_card
 	jmp $
+
+
+print_card:
+	call fetch_card_value
+	cmp cl, 10d
+	jg face_card
+	jl number_card
+print_card_done:
+	call print_char
+	ret
+face_card:
+	cmp cl, 11d
+	je jack
+
+	cmp cl, 12d
+	je queen
+
+	cmp cl, 13d
+	je king
+jack:
+	mov al, 'J'
+	jmp print_card_done
+queen:
+	mov al, 'Q'
+	jmp print_card_done
+king:
+	mov al, 'K'
+	jmp print_card_done
+number_card:
+	mov al, 'N'
+	jmp print_card_done
 
 print_char:
 	mov ah, 02h
@@ -32,12 +62,37 @@ print_char:
 	int 10h
 	ret
 
-.data
+; fetch_card_pile
+; - eax - input - address of card
+; - dl - output - card pile
+fetch_card_pile:
+	mov cl, byte [eax+1]
+	shr cl, 4
+	ret
+
+; fetch_card_value
+; - eax - input - address of card
+; - dl - output - card value
+fetch_card_value:
+	mov cl, byte [eax+1]
+	shl cl, 4
+	shr cl, 4
+	ret
+
+; fetch_card_family
+; - eax - input - address of card
+; - dl - output - card family
+fetch_card_family:
+	mov cl, byte [eax]
+	shr cl, 6
+	ret
+
+.data:
         ; Pile - 4 bits
         ; - 0-6 top row piles (2 is always empty)
         ; Card - 4 bits
         ; - A=1, 2, 3-10, J=11, Q=12, K=13
-        
+
         ; Family - 2 bits
         ; - 1 1 spade
         ; - 1 0 club
