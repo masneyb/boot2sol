@@ -43,6 +43,23 @@ fetch_card_value:
         shr dl, 4
         ret
 
+fetch_card_family:
+        mov dl, byte [eax]
+        shr dl, 6
+        ret
+
+fetch_card_shown:
+        mov dl, byte [eax]
+        shl dl, 2
+        shr dl, 7
+        ret
+
+fetch_card_pile_pos:
+        mov dl, byte [eax]
+        shl dl, 3
+        shr dl, 3
+        ret
+
 .data:
         ; Pile - 4 bits
         ; - 0-6 top row piles (2 is always empty)
