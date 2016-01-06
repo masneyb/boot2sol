@@ -332,7 +332,7 @@ finished:
   inc dl
   cmp dl, 7d
   jne .printdeck
-  popdx
+  pop dx
   ret
 
 ; ---------------------------------------------------------------------------
