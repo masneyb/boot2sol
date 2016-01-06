@@ -409,7 +409,7 @@ finished:
   dw 0000_1010_11_0_10101b
   dw 0000_1011_01_0_10110b
 
-				invalid_op db 'Invalid Operation', 0x00
+  invalid_op db 'NO', 0x00
 
   times 510-($-$$) db 0
   dw 0AA55h  ; Boot signature
