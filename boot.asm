@@ -142,11 +142,11 @@ print_lower_stacks:
 findcard:
 	mov al, [bx]
 	and al, 11110000b
+	shr al, 4
 	cmp al, ch
 	je stackmatch
-	inc bx
-	inc bx
-	cmp bx, card + 52
+	add bx,2
+	cmp bx, card + 104
 	je next_stack
 	jmp findcard
 
@@ -155,8 +155,7 @@ stackmatch:
 	and al, 00011111b
 	cmp al, cl
 	je cardmatch
-	inc bx
-	inc bx
+	add bx,2
 	cmp bx, card + 52
 	je next_stack
 	jmp findcard
@@ -164,14 +163,14 @@ stackmatch:
 cardmatch:
 	mov ax, bx
 	call print_card
-	inc dh
-	inc dh
+	add dh,2
 	dec dl
 	jmp findcard
 
 next_stack:			;we have finished one stack, increment stack, if < 13 continue, else done
 	inc ch
 	cmp ch, 00001101b
+	mov cl, 0d
 	je finished
 	jmp findcard
 
