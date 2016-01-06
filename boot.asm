@@ -1,7 +1,6 @@
 ; http://www.nasm.us/doc/nasmdoc0.html
 ; https://www.cs.uaf.edu/2006/fall/cs301/support/x86/
 ; www.ctyme.com/intr/int-10.htm
-; Initial code from Linux Voice Issue #14
 
   BITS 16
 
@@ -23,13 +22,14 @@
   ;call draw_board
   jmp $
 
+; ---------------------------------------------------------------------------
 
 print_card:
   call fetch_card_value
-	push cx
+  push cx
   call fetch_card_family
   mov bl, byte [colors+ecx]
-	pop ax
+  pop ax
   mov al, byte [fv+eax]
   call print_char
   mov al, byte [symbols+ecx]
@@ -45,18 +45,14 @@ print_char:
   int 10h
   ret
 
-; fetch_card_pile
-; - eax - input - address of card
-; - dl - output - card pile
+; ---------------------------------------------------------------------------
+
 fetch_card_pile:
   mov cl, byte [eax+1]
   shr cl, 4
   mov ch, 0
   ret
 
-; fetch_card_value
-; - eax - input - address of card
-; - dl - output - card value
 fetch_card_value:
   mov cl, byte [eax+1]
   shl cl, 4
@@ -64,16 +60,27 @@ fetch_card_value:
   mov ch, 0
   ret
 
-; fetch_card_family
-; - eax - input - address of card
-; - dl - output - card family
 fetch_card_family:
   mov cl, byte [eax]
   shr cl, 6
   mov ch, 0
   ret
-draw_board:
 
+fetch_card_shown:
+  mov dl, byte [eax]
+  shl dl, 2
+  shr dl, 7
+  ret
+
+fetch_card_pile_pos:
+  mov dl, byte [eax]
+  shl dl, 3
+  shr dl, 3
+  ret
+
+; ---------------------------------------------------------------------------
+
+draw_board:
   push dx
   mov dh, 10d
   mov dl, 0d
@@ -143,29 +150,31 @@ draw_board:
   inc dl
   cmp dl, 7d
   jne .printdeck
-
   popdx
   ret
 
-.data:
-        ; Pile - 4 bits
-        ; - 0-6 top row piles (2 is always empty)
-        ; Card - 4 bits
-        ; - A=1, 2, 3-10, J=11, Q=12, K=13
+; ---------------------------------------------------------------------------
 
-        ; Family - 2 bits
-        ; - 1 1 hearts
-        ; - 1 0 diamond
-        ; - 0 1 spades
-        ; - 0 0 clubs
-        ; - First bit is the color (1=black, 0=red)
-        ; Shown? - 1 bit
-        ; Position in current pile - 5 bits
-        fv db ' A23456789TJQK'
-        colors db 7d, 7d, 4d, 4d
-        symbols db 'CSDH'
-        card dw 1011_1101_10_1_11001b
-        dw 1111_0000_00_1_00010b
+.data:
+  ; Pile - 4 bits
+  ; - 0-6 top row piles (2 is always empty)
+  ; Card - 4 bits
+  ; - A=1, 2, 3-10, J=11, Q=12, K=13
+
+  ; Family - 2 bits
+  ; - 1 1 hearts
+  ; - 1 0 diamond
+  ; - 0 1 spades
+  ; - 0 0 clubs
+  ; - First bit is the color (1=black, 0=red)
+  ; Shown? - 1 bit
+  ; Position in current pile - 5 bits
+
+  fv db ' A23456789TJQK'
+  colors db 7d, 7d, 4d, 4d
+  symbols db 'CSDH'
+  card dw 1011_1101_10_1_11001b
+  dw 1111_0000_00_1_00010b
 
   times 510-($-$$) db 0
   dw 0AA55h  ; Boot signature
