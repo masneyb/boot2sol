@@ -18,9 +18,10 @@
   mov dh, 5d
   mov dl, 10d
   mov ax, card
-  call print_card
-  ;call draw_board
-	jmp loopy
+  ;call print_card
+  call draw_board
+;	jmp loopy
+
 loopy:
 	mov ah, 0
 	int 16h
@@ -119,68 +120,7 @@ draw_board:
   mov dh, 10d
   mov dl, 0d
 
-.printhorizontaldivider:
-  mov al, '-'
-  call print_char
-  inc dl
-  cmp dl, 255d
-  jne .printhorizontaldivider
-
-  mov dh, 0d
-  mov dl, 10d
-  mov al, '|'
-.vertline1:
-  call print_char
-  inc dh
-  cmp dh, 10d
-  jne .vertline1
-  mov dh, 0d
-  mov dl, 30d
-.vertline2:
-  call print_char
-  inc dh
-  cmp dh,10d
-  jne .vertline2
-  mov dh, 0d
-  mov dl, 40d
-.vertline3:
-  call print_char
-  inc dh
-  cmp dh,10d
-  jne .vertline3
-  mov dh,  0d
-  mov dl,  50d
-.vertline4:
-  call print_char
-  inc dh
-  cmp dh,10d
-  jne .vertline4
-  mov dh, 0d
-  mov dl, 60d
-.vertline5:
-  call print_char
-  inc dh
-  cmp dh,10d
-  jne .vertline5
-  mov dh, 0d
-  mov dl, 60d
-.vertline6:
-  call print_char
-  inc dh
-  cmp dh,10d
-  jne .vertline6
-  mov dh, 0d
-  mov dl, 70d
-.vertline7:
-  call print_char
-  inc dh
-  cmp dh,10d
-  jne .vertline7
-  mov dh, 5d
-  mov dl, 4d
-  mov al, '-'
 .printdeck:
-
 	call print_char
 	inc dl
 	cmp dl, 7d
@@ -190,72 +130,6 @@ draw_board:
 	mov dh, 11d
 	mov dl, 0d
 	mov al, '|'
-line1:
-	call print_char
-	inc dh
-	cmp dh, 21d
-	jne line1
-	mov dh, 11d
-	mov dl, 10d
-line2:
-	call print_char
-	inc dh
-	cmp dh, 21d
-	jne line2
-	mov dh, 11d
-	mov dl, 20d
-line3:
-	call print_char
-	inc dh
-	cmp dh, 21d
-	jne line3
-	mov dh, 11d
-	mov dl, 30d
-line4:
-	call print_char
-	inc dh
-	cmp dh, 21d
-	jne line4
-	mov dh, 11d
-	mov dl, 40d
-line5:
-	call print_char
-	inc dh
-	cmp dh, 21d
-	jne line5
-	mov dh, 11d
-	mov dl, 50d
-line6:	
-	call print_char
-	inc dh
-	cmp dh, 21d
-	jne line6
-	mov dh, 11d
-	mov dl, 60d
-line7:
-	call print_char
-	inc dh
-	cmp dh, 21d
-	jne line7
-	mov dh, 11d
-	mov dl, 70d
-line8:
-	call print_char
-	inc dh
-	cmp dh, 21d
-	jne line8
-	mov dh, 11d
-	mov dl, 80d
-line9:
-	call print_char
-	inc dh
-	cmp dh, 21d
-	jne line9
-	mov dh, 11d
-	mov dl, 90d
-
-	;; the lines for bottom stacks are finished printing, now to invidually print each stack with
-	;; the proper number of facedown cards and the top card
 
 print_stack_7:
 	;; this needs to do the following:
