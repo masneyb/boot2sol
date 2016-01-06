@@ -60,6 +60,7 @@ main_move:
 	jmp loopy
 
 print_card:
+  pusha
   call fetch_card_value
   push cx
   call fetch_card_family
@@ -70,6 +71,7 @@ print_card:
   mov al, byte [symbols+ecx]
   inc dl
   call print_char
+  popa 
   ret
 
 print_char:
@@ -128,10 +130,7 @@ fetch_card_pile_pos:
 	;; 	They should be printed one on top of the other
 	;; as this subroutine will be used 7 times make sure it can be called for each stack
 print_lower_stacks:
-	push ax
-	push bx
-	push cx
-	push dx
+	pusha
 	;; need to store the pile number somewhere
 	;; need to store the current card number somewhere this corresponds to the position in stack
 	mov ch, 7h		;the current stack - will iterate from 7-13
@@ -175,10 +174,7 @@ next_stack:			;we have finished one stack, increment stack, if < 13 continue, el
 	jmp findcard
 
 finished:
-	pop dx
-	pop cx
-	pop bx
-	pop ax
+	popa
 	ret
 
 
