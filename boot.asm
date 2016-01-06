@@ -21,8 +21,43 @@
   mov ax, card
   call print_card
   ;call draw_board
-  jmp $
+	jmp loopy
+loopy:
+	mov ah, 0
+	int 16h
+	cmp al, 'd'
+	je main_draw
 
+	cmp al, 'm'
+	je main_move
+
+	call print_invalid_op
+  jmp loopy
+
+print_invalid_op:
+	mov dl, 0d
+	mov dh, 0d
+	mov bl, 4d
+	mov bh, 0d
+	mov ah, 02h
+	int 10h
+	
+	mov si, invalid_op
+  mov ah, 0Eh
+  .loop:
+      lodsb
+      cmp al, 0x00
+      je .done
+      int 10h
+      jmp .loop
+  .done:
+      ret
+
+main_draw:
+	jmp loopy
+
+main_move:
+	jmp loopy
 
 print_card:
   call fetch_card_value
@@ -166,6 +201,8 @@ draw_board:
         symbols db 'CSDH'
         card dw 1011_1101_10_1_11001b
         dw 1111_0000_00_1_00010b
+
+				invalid_op db 'Invalid Operation', 0x00
 
   times 510-($-$$) db 0
   dw 0AA55h  ; Boot signature
