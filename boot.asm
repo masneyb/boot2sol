@@ -43,3 +43,21 @@ print_string:
 
 	times 510-($-$$) db 0
 	dw 0AA55h	; Boot signature
+
+section .data
+        ; Family - 2 bits
+        ; - 1 1 spade
+        ; - 1 0 club
+        ; - 0 1 heart
+        ; - 0 0 diamond
+        ; - First bit is the color (1=black, 0=red)
+        ; Card - 4 bits
+        ; - A=1, 2, 3-10, J=11, Q=12, K=13
+        ; Pile - 4 bits
+        ; - 0-6 top row piles (2 is always empty)
+        ; Shown? - 1 bit
+        ; Position in current pile - 5 bits
+
+        card dw 11_1000_0000_1_00010b
+        dw 11_0010_1000_0_00001b
+
