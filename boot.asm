@@ -140,7 +140,7 @@ print_lower_stacks:
 	mov dh, 11d
 	mov dl, 5d
 findcard:
-	mov al, [bx]
+	mov al, [bx+1]
 	and al, 11110000b
 	shr al, 4
 	cmp al, ch
@@ -151,7 +151,7 @@ findcard:
 	jmp findcard
 
 stackmatch:
-	mov al, [bx+1]
+	mov al, [bx]
 	and al, 00011111b
 	cmp al, cl
 	je cardmatch
