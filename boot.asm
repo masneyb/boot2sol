@@ -16,29 +16,20 @@
 	mov al, 12h	; 12h = G  80x30  8x16  640x480   16/256K  .   A000 VGA,ATI VIP
 	int 10h		; Call BIOS
 
-loop:
-	mov ah, 02h	; Set cursor position
-	mov bh, 0	; In graphics mode
-	mov dh, 5	; Row
-	mov dl, 10	; Column
-	int 10h		; Call BIOS
 
-	mov si, text_string
-	call print_string
-	inc bl		; Change colour
-	jmp loop
+	mov dh, 5d
+	mov dl, 10d
+	mov al, 'H'
+	call print_char
+	jmp $
 
-	text_string db 'Bare metal rules! ', 0
-
-print_string:
-	mov ah, 0Eh	; Print character routine
-.repeat:
-	lodsb
-	cmp al, 0
-	je .done
-	int 10h		; Call BIOS
-	jmp .repeat
-.done:
+print_char:
+	mov ah, 02h
+	mov bh, 0
+	mov bl, 5
+	int 10h
+	mov ah, 0Eh
+	int 10h
 	ret
 
 fetch_card_pile:

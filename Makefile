@@ -7,7 +7,7 @@ sol: sol.asm
 
 floppy: clean boot
 	mkdosfs -C floppy.img 1440
-	dd conv=notrunc if=boot.bin of=floppy.img
+	dd status=noxfer conv=notrunc if=boot.bin of=floppy.img
 
 run: floppy
 	qemu-system-i386 floppy.img
