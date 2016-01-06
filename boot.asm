@@ -41,7 +41,18 @@ print_string:
 .done:
 	ret
 
-.data
+fetch_card_pile:
+	mov dl, byte [eax+1]
+	shr dl, 4
+	ret
+
+fetch_card_value:
+        mov dl, byte [eax+1]
+        shl dl, 4
+        shr dl, 4
+        ret
+
+.data:
         ; Pile - 4 bits
         ; - 0-6 top row piles (2 is always empty)
         ; Card - 4 bits

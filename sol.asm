@@ -52,7 +52,7 @@ fetch_card_shown:
 ; fetch_card_pile_pos
 ; - eax - input - address of card 
 ; - dl - output - card shown
-fetch_card_pile_pos
+fetch_card_pile_pos:
 	mov dl, byte [eax]
 	shl dl, 3
 	shr dl, 3
@@ -73,4 +73,5 @@ section .data
         ; Position in current pile - 5 bits
 
         card dw 1011_1101_10_1_11001b
+        dw 0100_0010_01_0_00110b
 
