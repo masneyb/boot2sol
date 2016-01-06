@@ -225,7 +225,7 @@ line5:
 	jne line5
 	mov dh, 11d
 	mov dl, 50d
-line6
+line6:	
 	call print_char
 	inc dh
 	cmp dh, 21d
@@ -270,7 +270,7 @@ print_stack_7:
 	;; 	They should be printed one on top of the other
 	;; as this subroutine will be used 7 times make sure it can be called for each stack
 
-	popdx
+	pop dx
 	ret
 print_lower_stacks:
 	push ax
@@ -308,7 +308,7 @@ stackmatch:
 
 cardmatch:
 	mov ax, bx
-	call printcard
+	call print_card
 	inc dh
 	inc dh
 	dec dl
@@ -316,7 +316,7 @@ cardmatch:
 
 next_stack:			;we have finished one stack, increment stack, if < 13 continue, else done
 	inc ch
-	cmp ch, eh
+	cmp ch, 00001101b
 	je finished
 	jmp findcard
 
@@ -328,14 +328,7 @@ finished:
 	ret
 
 
-  call print_char
-  inc dl
-  cmp dl, 7d
-  jne .printdeck
-  pop dx
-  ret
-
-; ---------------------------------------------------------------------------
+  ; ---------------------------------------------------------------------------
 
 
 .data:
