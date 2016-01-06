@@ -87,11 +87,6 @@ fetch_card_family:
 	shr cl, 6
 	ret
 
-fetch_card_pile:
-	mov cl, byte [eax+1]
-	shr cl, 4
-	ret
-
 .data:
         ; Pile - 4 bits
         ; - 0-6 top row piles (2 is always empty)
