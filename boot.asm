@@ -30,6 +30,7 @@
 
 game_loop:
   mov ax, 0600h		; Clear the screen
+  xor bx, bx
   int 10h
 
   ; Print status message. First set the cursor
@@ -64,6 +65,9 @@ process_keyboard_input:
 ; ---------------------------------------------------------------------------
 
 draw_command:
+  mov ah, byte [pile_pointers]
+  mov al, byte [pile_pointers+1]
+  mov [pile_pointers+1], byte ah
   mov [status_message], byte draw_message
   jmp game_loop
 
