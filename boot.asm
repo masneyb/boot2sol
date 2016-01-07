@@ -38,8 +38,7 @@ game_loop:
 
   call print_status_message
   call print_stacks
-  call process_keyboard_input
-  jmp game_loop
+  jmp process_keyboard_input
 
 ; ---------------------------------------------------------------------------
 
@@ -47,29 +46,20 @@ process_keyboard_input:
   xor ah, ah
   int 16h
 
-  xor ecx, ecx
-check_key:
-  mov dl, byte [key_inputs+ecx]
-  cmp dl, 0x0
-  je key_not_mapped
+  cmp al, 'd'
+  je draw_command
 
-  cmp al, [key_inputs+ecx]
-  je key_found
-  inc ecx
-  jmp check_key
-key_found:
-  call [key_actions+2*ecx]
-  jmp keydone
-key_not_mapped:
+  cmp al, 'm'
+  je move_command
+
   mov [status_message], byte invalid_op_message
-keydone:
-  ret
+  jmp game_loop
 
 ; ---------------------------------------------------------------------------
 
 draw_command:
   mov [status_message], byte draw_message
-  ret
+  jmp game_loop
 
 ; ---------------------------------------------------------------------------
 
