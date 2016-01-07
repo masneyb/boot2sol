@@ -124,9 +124,7 @@ print_char:
 
 fetch_card_value:
   mov cl, byte [eax+1]
-  shl cl, 4d
-  shr cl, 4d
-  xor ch, ch
+  and cx, 000fh
   ret
 
 fetch_card_family:
