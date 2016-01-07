@@ -15,9 +15,6 @@
   mov al, 12h		; 12h = G  80x30  8x16  640x480   16/256K  .   A000 VGA,ATI VIP
   int 10h		; Call BIOS
 
-  mov dh, 5d
-  mov dl, 10d
-
   call print_lower_stacks
 
 ;	jmp loopy
@@ -61,26 +58,28 @@
 ; ---------------------------------------------------------------------------
 
 print_card:
-  pusha
+  pusha					; Save all registers
   call fetch_card_value
-  push cx
+  push cx				; Save the current card value
   call fetch_card_family
   mov bl, byte [family_colors+ecx]
-  pop ax
+  pop ax				; Get the previously saved card value
   mov al, byte [card_values+eax]
-  call print_char
+  call print_char			; Print the card value (i.e. 2, 3, K, etc)
   mov al, byte [family_symbols+ecx]
-  inc dl
-  call print_char
+  inc dl				; Move cursor over one for family
+  call print_char			; Print card family
   popa
   ret
 
 print_char:
+  pusha
   mov ah, 02h
   mov bh, 0
   int 10h
   mov ah, 0Eh
   int 10h
+  popa
   ret
 
 ; ---------------------------------------------------------------------------
@@ -105,15 +104,17 @@ fetch_card_family:
   ret
 
 fetch_card_shown:
-  mov dl, byte [eax]
-  shl dl, 2d
-  shr dl, 7d
+  mov cl, byte [eax]
+  shl cl, 2d
+  shr cl, 7d
+  mov ch, 0d
   ret
 
 fetch_card_pile_pos:
-  mov dl, byte [eax]
-  shl dl, 3d
-  shr dl, 3d
+  mov cl, byte [eax]
+  shl cl, 3d
+  shr cl, 3d
+  mov ch, 0d
   ret
 
 ; ---------------------------------------------------------------------------
