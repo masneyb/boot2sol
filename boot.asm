@@ -2,6 +2,11 @@
 ; https://www.cs.uaf.edu/2006/fall/cs301/support/x86/
 ; www.ctyme.com/intr/int-10.htm
 
+%define top_row_num	5d
+%define bottom_row_num	9d
+%define first_stack_col 5d
+%define stack_spacing	10d
+
   BITS 16
 
   mov ax, 07C0h		; Where we're loaded
@@ -15,7 +20,7 @@
   mov al, 12h		; 12h = G  80x30  8x16  640x480   16/256K  .   A000 VGA,ATI VIP
   int 10h		; Call BIOS
 
-  call print_lower_stacks
+  call print_stacks
 
 ;	jmp loopy
 ; loopy:
@@ -131,15 +136,15 @@ fetch_card_pile_pos:
 	;; 	This will simply print the next cards value (King of Spades)
 	;; 	They should be printed one on top of the other
 	;; as this subroutine will be used 7 times make sure it can be called for each stack
-print_lower_stacks:
+print_stacks:
 	pusha
 	;; need to store the pile number somewhere
 	;; need to store the current card number somewhere this corresponds to the position in stack
-	mov ch, 7h		;the current stack - will iterate from 7-13
+	mov ch, 0h		;the current stack - will iterate from 0-13
 	mov cl, 0d 		;current card number
 	mov bx, first_card	;current mem location (gets incremented by 2 each iteration) (from 152 - 256)
-	mov dh, 11d		;current cursor row
-	mov dl, 5d		;current cursor column
+	mov dh, top_row_num	;current cursor row
+	mov dl, first_stack_col	;current cursor column
 findcard:
 	mov al, [bx+1]			; Fetch the card pile
 	and al, 11110000b
@@ -164,19 +169,38 @@ stackmatch:
 cardmatch:
 	mov ax, bx
 	call print_card
-	add dh,2d			; Increment cursor row
+	cmp ch, 7h
+	jl cardmatch_nextcard		; Only increment the cursor row if in bottom row
+	add dh,2d			; Increment cursor row only on bottom row
+cardmatch_nextcard:
 	inc cl				; Next card number
 	add bx,2d                       ; Move card pointer
 	jmp findcard
 
-next_stack:			;we have finished one stack, increment stack, if < 14 continue, else done
+next_stack:				; We have finished one stack, increment stack, if < 14 continue, else done
 	mov bx, first_card		; Reset pointer to beginning of cards
 	inc ch
 	cmp ch, 14d
 	je finished
 	mov cl, 0d			; Proces first card
-	add dl, 4d			; Increment cursor column
-	mov dh, 11d			; Reset cursor row
+
+	cmp ch, 7h			; What stack are we processing?
+	je next_stack_first_bottom_row	; Beginning of bottom row?
+	jl next_stack_top_row		; Still on the top row?
+					; Otherwise we are on the bottom row
+	add dl, stack_spacing		; Increment cursor column
+	mov dh, bottom_row_num		; Reset cursor row
+	jmp findcard
+
+next_stack_top_row:
+	add dl, stack_spacing		; Increment cursor column
+	mov dh, top_row_num		; Reset cursor row
+	jmp findcard
+
+next_stack_first_bottom_row:		; We are at the beginning of the
+					; first stack on the bottom row.
+	mov dh, bottom_row_num		; current cursor row
+	mov dl, first_stack_col		; current cursor column
 	jmp findcard
 
 finished:
