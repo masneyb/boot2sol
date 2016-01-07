@@ -10,6 +10,11 @@
 
 %define end_of_stack	01111111b
 
+%define ok_message		'O'
+%define invalid_op_message	'!'
+%define draw_message 		'D'
+%define move_message		'M'
+
   BITS 16
 
   ; Set this so that the CS register is set
@@ -56,20 +61,20 @@ key_found:
   call [key_actions+2*ecx]
   jmp keydone
 key_not_mapped:
-  mov [status_message], word invalid_op_message
+  mov [status_message], byte invalid_op_message
 keydone:
   ret
 
 ; ---------------------------------------------------------------------------
 
 draw_command:
-  mov [status_message], word draw_message
+  mov [status_message], byte draw_message
   ret
 
 ; ---------------------------------------------------------------------------
 
 move_command:
-  mov [status_message], word move_message
+  mov [status_message], byte move_message
   ret
 
 ; ---------------------------------------------------------------------------
@@ -80,15 +85,9 @@ print_status_message:
   mov ah, 02h	; set cursor position
   int 10h
 
-  mov si, [status_message]
+  mov al, [status_message]
   mov ah, 0eh
-.loop:
-  lodsb
-  cmp al, 0x00
-  je .done
   int 10h
-  jmp .loop
-.done:
   ret
 
 ; ---------------------------------------------------------------------------
@@ -284,11 +283,7 @@ stackdone:
   db 1001110b
   db 1011010b
 
-  status_message dw ok_message
-  ok_message db 'O', 0x0
-  invalid_op_message db '!', 0x0
-  draw_message db 'D', 0x0
-  move_message db 'M', 0x0
+  status_message db ok_message
 
   key_inputs db 'dm', 0x00
   key_actions dw draw_command, move_command
