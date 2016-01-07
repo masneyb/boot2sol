@@ -137,44 +137,45 @@ print_lower_stacks:
 	;; need to store the current card number somewhere this corresponds to the position in stack
 	mov ch, 7h		;the current stack - will iterate from 7-13
 	mov cl, 0d 		;current card number
-	mov bx, first_card		;current mem location (gets incremented by 2 each iteration) (from 152 - 256)
-	mov dh, 11d
-	mov dl, 5d
+	mov bx, first_card	;current mem location (gets incremented by 2 each iteration) (from 152 - 256)
+	mov dh, 11d		;current cursor row
+	mov dl, 5d		;current cursor column
 findcard:
-	mov al, [bx+1]
+	mov al, [bx+1]			; Fetch the card pile
 	and al, 11110000b
 	shr al, 4d
 	cmp al, ch
 	je stackmatch
-	add bx,2
-	cmp bx, first_card + 104d
+	add bx,2			; Move card pointer
+	cmp bx, first_card + 104d	; End of cards?
 	je next_stack
 	jmp findcard
 
 stackmatch:
-	mov al, [bx]
+	mov al, [bx]			; Fetch the card pile position
 	and al, 00011111b
 	cmp al, cl
 	je cardmatch
-	add bx,2d
-	cmp bx, first_card + 104d
+	add bx,2d			; Move card pointer
+	cmp bx, first_card + 104d	; End of cards?
 	je next_stack
 	jmp findcard
 
 cardmatch:
 	mov ax, bx
 	call print_card
-	add dh,2d
-	inc cl
+	add dh,2d			; Increment cursor row
+	inc cl				; Next card number
+	; FIXME - add bx,2d                       ; Move card pointer
 	jmp findcard
 
 next_stack:			;we have finished one stack, increment stack, if < 14 continue, else done
 	inc ch
 	cmp ch, 14d
 	je finished
-	mov cl, 0d
-	add dl, 4d
-	mov dh, 11d
+	mov cl, 0d			; Proces first card
+	add dl, 4d			; Increment cursor column
+	mov dh, 11d			; Reset cursor row
 	jmp findcard
 
 finished:
