@@ -8,6 +8,8 @@
 %define stack_spacing	10d
 %define all_cards_len	104d
 
+%define end_of_stack	0xff
+
   BITS 16
 
   ; Set this so that the CS register is set
@@ -26,7 +28,7 @@
   int 10h		; Call BIOS
 
 game_loop:
-  mov ah, 06h
+  mov ah, 06h		; Clear the screen
   mov al, 0
   int 10h
 
@@ -114,8 +116,6 @@ move_command:
 ; ---------------------------------------------------------------------------
 
 print_status_message:
-  ; FIXME - handle empty status messages. Truncate ok_message to 0 once done.
-
   mov dl, 0d
   mov dh, 0d
   mov bl, 4d
@@ -165,12 +165,6 @@ print_char:
 
 ; ---------------------------------------------------------------------------
 
-fetch_card_pile:
-  mov cl, byte [eax+1]
-  shr cl, 4d
-  mov ch, 0d
-  ret
-
 fetch_card_value:
   mov cl, byte [eax+1]
   shl cl, 4d
@@ -179,7 +173,7 @@ fetch_card_value:
   ret
 
 fetch_card_family:
-  mov cl, byte [eax]
+  mov cl, byte [eax+1]
   shr cl, 6d
   mov ch, 0d
   ret
@@ -190,100 +184,64 @@ fetch_card_family:
 ;  shr cl, 7d
 ;  mov ch, 0d
 ;  ret
-;
-;fetch_card_pile_pos:
-;  mov cl, byte [eax]
-;  shl cl, 3d
-;  shr cl, 3d
-;  mov ch, 0d
-;  ret
 
 ; ---------------------------------------------------------------------------
 
-	;; print the stacks
-	;; this needs to do the following:
-	;; search for card that belongs in the current position of this deck (looping from 0-?)
-	;; two modes:
-	;; Mode1	The first mode is automatically set.
-	;; 	This mode remains until a card is found that should be "Shown"
-	;; 	The first mode prints just tops of cards to signify face down cards
-	;; Mode2	this mode prints face up cards towards the top of the stack
-	;; 	This mode will continue until no more cards exist in the stack
-	;; 	This will simply print the next cards value (King of Spades)
-	;; 	They should be printed one on top of the other
-	;; as this subroutine will be used 7 times make sure it can be called for each stack
 print_stacks:
 	pusha
 
-	;; need to store the pile number somewhere
-	;; need to store the current card number somewhere this corresponds to the position in stack
-	mov ch, 0h		;the current stack - will iterate from 0-13
-	mov cl, 0d 		;current card number
-	mov bx, first_card	;current mem location (gets incremented by 2 each iteration) (from 152 - 256)
-	mov dh, top_row_num	;current cursor row
-	mov dl, first_stack_col	;current cursor column
-findcard:
-	mov al, [bx+1]			; Fetch the card pile
-	and al, 11110000b
-	shr al, 4d
-	cmp al, ch
-	je stackmatch
-	add bx,2				; Move card pointer
-	cmp bx, first_card + all_cards_len	; End of cards?
-	je next_stack
-	jmp findcard
+	mov dh, top_row_num     	; Current cursor row
+	mov dl, first_stack_col 	; Current cursor column
 
-stackmatch:
-	mov al, [bx]				; Fetch the card pile position
-	and al, 00011111b
-	cmp al, cl
-	je cardmatch
-	add bx,2d				; Move card pointer
-	cmp bx, first_card + all_cards_len	; End of cards?
-	je next_stack
-	jmp findcard
+	mov eax, 0h			; Clear 32 bit register
+	mov ebx, 0h			; Clear 32 bit register
+	mov ecx, 0d			; The current stack - will iterate from 0-13
+top_of_stack:
+	mov bl, byte [stack_pointers+ecx] ; Index of the current stack head
+show_stack_card:
+	cmp bl, end_of_stack
+	je nextstack
 
-cardmatch:
-	mov ax, bx
+	mov ax, first_card		; Card with the index
+	add ax, bx
 	call print_card
-	cmp ch, 7h
-	jl cardmatch_nextcard		; Only increment the cursor row if in bottom row
+
+	cmp ecx, 7h
+	jl dumpstack_nextcard		; Only increment the cursor row if in bottom row
 	add dh,2d			; Increment cursor row only on bottom row
-cardmatch_nextcard:
-	inc cl				; Next card number
-	add bx,2d                       ; Move card pointer
-	jmp findcard
 
-next_stack:				; We have finished one stack, increment stack, if < 14 continue, else done
-	mov bx, first_card		; Reset pointer to beginning of cards
-	inc ch
-	cmp ch, 14d
-	je finished
-	mov cl, 0d			; Proces first card
+dumpstack_nextcard:
+	mov bl, byte [eax]		; Update next card pointer
+	jmp show_stack_card
 
-	cmp ch, 7h			; What stack are we processing?
+nextstack:
+	cmp ecx, 13d
+	je stackdone
+
+	inc ecx
+
+	cmp ecx, 7h			; What stack are we processing?
 	je next_stack_first_bottom_row	; Beginning of bottom row?
 	jl next_stack_top_row		; Still on the top row?
 					; Otherwise we are on the bottom row
 	add dl, stack_spacing		; Increment cursor column
 	mov dh, bottom_row_num		; Reset cursor row
-	jmp findcard
+	jmp top_of_stack
 
 next_stack_top_row:
 	add dl, stack_spacing		; Increment cursor column
 	mov dh, top_row_num		; Reset cursor row
-	jmp findcard
+	jmp top_of_stack
 
 next_stack_first_bottom_row:		; We are at the beginning of the
 					; first stack on the bottom row.
 	mov dh, bottom_row_num		; current cursor row
 	mov dl, first_stack_col		; current cursor column
-	jmp findcard
+	jmp top_of_stack
 
-finished:
+stackdone:
 	popa
 	ret
-
 
   ; ---------------------------------------------------------------------------
 
@@ -302,85 +260,76 @@ finished:
   ; Unused - 1 bit
   ; Card - 4 bits
   ; - A=1, 2, 3-10, J=11, Q=12, K=13
+
   ; Pointer to next - 8 bits - 0xff - end of list
 
-  first_card dw 1101_1001_00_0_00000b ; 9C
-  dw 1101_1101_01_0_00001b ; KS
-  dw 1101_0111_00_0_00010b ; 7C
-  dw 1101_0011_10_0_00011b ; 3D
-  dw 1101_0111_01_0_00100b ; 7S
-  dw 1101_1000_10_0_00101b ; 8D
-  dw 1101_0111_10_1_00110b ; 7D+
-  dw 1100_1010_11_0_00000b ; TH
-  dw 1100_1001_11_0_00001b ; 9H
-  dw 1100_0010_10_0_00010b ; 2D
-  dw 1100_1011_00_0_00011b ; JC
-  dw 1100_0101_00_0_00100b ; 5C
-  dw 1100_1010_10_1_00101b ; TD+
-  dw 1011_0011_00_0_00000b ; 3C
-  dw 1011_0010_11_0_00001b ; 2H
-  dw 1011_1000_01_0_00010b ; 8S
-  dw 1011_0110_01_0_00011b ; 6S
-  dw 1011_1100_11_1_00100b ; QH+
-  dw 1010_1010_01_0_00000b ; TS
-  dw 1010_0001_01_0_00001b ; AS
-  dw 1010_0100_00_0_00010b ; 4C
-  dw 1010_0100_10_1_00011b ; 4D+
-  dw 1001_0110_10_0_00000b ; 6D
-  dw 1001_1011_01_0_00001b ; JS
-  dw 1001_1011_11_1_00010b ; JH+
-  dw 1000_0001_10_0_00000b ; AD
-  dw 1000_0111_11_1_00001b ; 7H+
-  dw 0111_0100_01_1_00000b ; 4S+
-  dw 0001_1101_10_1_00000b ; KD+
-  dw 0000_0011_01_0_00000b ; 3S
-  dw 0000_0010_01_0_00001b ; 2S
-  dw 0000_0101_11_0_00010b ; 5H
-  dw 0000_0011_11_0_00011b ; 3H
-  dw 0000_1001_01_0_00100b ; 9S
-  dw 0000_1101_11_0_00101b ; KH
-  dw 0000_0110_11_0_00110b ; 6H
-  dw 0000_1001_10_0_00111b ; 9D
-  dw 0000_0010_00_0_01000b ; 2C
-  dw 0000_0100_11_0_01001b ; 4H
-  dw 0000_1010_00_0_01010b ; TC
-  dw 0000_1100_00_0_01011b ; QC
-  dw 0000_0001_00_0_01100b ; AC
-  dw 0000_0101_01_0_01101b ; 5S
-  dw 0000_0001_11_0_01110b ; AH
-  dw 0000_1101_00_0_01111b ; KC
-  dw 0000_1100_01_0_10000b ; QS
-  dw 0000_0101_10_0_10001b ; 5D
-  dw 0000_1000_00_0_10010b ; 8C
-  dw 0000_1000_11_0_10011b ; 8H
-  dw 0000_1100_10_0_10100b ; QD
-  dw 0000_0110_00_0_10101b ; 6C
-  dw 0000_1011_10_0_10110b ; JD
+  first_card dw 01_0_0_0111_00000010b ; 7S  - Top of deck stack - 00000000
+  dw 01_0_0_0011_00000100b ; 3S  - 00000010
+  dw 00_0_0_0001_00000110b ; AC  - 00000100
+  dw 01_0_0_0101_00001000b ; 5S  - 00000110
+  dw 01_0_0_1011_00001010b ; JS  - 00001000
+  dw 11_0_0_1000_00001100b ; 8H  - 00001010
+  dw 11_0_0_0100_00001110b ; 4H  - 00001100
+  dw 11_0_0_0001_00010000b ; AH  - 00001110
+  dw 00_0_0_0111_00010010b ; 7C  - 00010000
+  dw 10_0_0_1100_00010100b ; QD  - 00010010
+  dw 00_0_0_1001_00010110b ; 9C  - 00010100
+  dw 11_0_0_1101_00011000b ; KH  - 00010110
+  dw 10_0_0_0111_00011010b ; 7D  - 00011000
+  dw 10_0_0_0011_00011100b ; 3D  - 00011010
+  dw 00_0_0_1011_00011110b ; JC  - 00011100
+  dw 00_0_0_1010_00100000b ; TC  - 00011110
+  dw 11_0_0_0011_00100010b ; 3H  - 00100000
+  dw 11_0_0_1100_00100100b ; QH  - 00100010
+  dw 00_0_0_0101_00100110b ; 5C  - 00100100
+  dw 01_0_0_0110_00101000b ; 6S  - 00100110
+  dw 10_0_0_0101_00101010b ; 5D  - 00101000
+  dw 11_0_0_0111_00101100b ; 7H  - 00101010
+  dw 00_0_0_0110_11111111b ; 6C  - 00101100
+  dw 01_1_0_1010_11111111b ; TS+ - Drawn card - 00101110
+  dw 00_1_0_1000_11111111b ; 8C+ - Beginning of stack 7 - 00110000
+  dw 10_0_0_1001_00110100b ; 9D  - Beginning of stack 8 - 00110010
+  dw 00_1_0_1100_11111111b ; QC+ - 00110100
+  dw 01_0_0_0100_00111000b ; 4S  - Beginning of stack 9 - 00110110
+  dw 00_0_0_0010_00111010b ; 2C  - 00111000
+  dw 01_1_0_1101_11111111b ; KS+ - 00111010
+  dw 10_0_0_0100_00111110b ; 4D  - Beginning of stack 10 - 00111100
+  dw 11_0_0_0010_01000000b ; 2H  - 00111110
+  dw 01_0_0_0010_01000010b ; 2S  - 01000000
+  dw 00_1_0_0011_11111111b ; 3C+ - 01000010
+  dw 10_0_0_0010_01000110b ; 2D  - Beginning of stack 11 - 01000100
+  dw 01_0_0_1001_01001000b ; 9S  - 01000110
+  dw 11_0_0_1010_01001010b ; TH  - 01001000
+  dw 10_0_0_1010_01001100b ; TD  - 01001010
+  dw 01_1_0_1000_11111111b ; 8S+ - 01001100
+  dw 10_0_0_0110_01010000b ; 6D  - Beginning of stack 12 - 01001110
+  dw 10_0_0_1000_01010010b ; 8D  - 01010000
+  dw 10_0_0_0001_01010100b ; AD  - 01010010
+  dw 10_0_0_1101_01010110b ; KD  - 01010100
+  dw 00_0_0_1101_01011000b ; KC  - 01010110
+  dw 01_1_0_0001_11111111b ; AS+ - 01011000
+  dw 11_0_0_0101_01011100b ; 5H  - Beginning of stack 13 - 01011010
+  dw 11_0_0_0110_01011110b ; 6H  - 01011100
+  dw 10_0_0_1011_01100000b ; JD  - 01011110
+  dw 00_0_0_0100_01100010b ; 4C  - 01100000
+  dw 01_0_0_1100_01100100b ; QS  - 01100010
+  dw 11_0_0_1001_01100110b ; 9H  - 01100100
+  dw 11_1_0_1011_11111111b ; JH+ - 01100110
 
-  ; Card positions. Cards with a + are shown.
-  ; 3S  KD+                     4S+ AD  6D  TS  3C  TH  9C
-  ; 2S                              7H+ JS  AS  2H  9H  KS
-  ; 5H                                  JH+ 4C  8S  2D  7C
-  ; 3H                                      4D+ 6S  JC  3D
-  ; 9S                                          QH+ 5C  7S
-  ; KH                                              TD+ 8D
-  ; 6H                                                  7D+
-  ; 9D
-  ; 2C
-  ; 4H
-  ; TC
-  ; QC
-  ; AC
-  ; 5S
-  ; AH
-  ; KC
-  ; QS
-  ; 5D
-  ; 8C
-  ; 8H
-  ; QD
-  ; 6C
-  ; JD
+  stack_pointers db 00000000b
+  db 00101110b
+  db 11111111b
+  db 11111111b
+  db 11111111b
+  db 11111111b
+  db 11111111b
+  db 00110000b
+  db 00110010b
+  db 00110110b
+  db 00111100b
+  db 01000100b
+  db 01001110b
+  db 01011010b
 
   status_message dw ok_message
   ok_message db 'OK', 0x0
