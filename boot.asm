@@ -134,12 +134,11 @@ print_stacks:
 	mov dh, top_row_num     	; Current cursor row
 	mov dl, first_stack_col 	; Current cursor column
 
-	xor bh, bh
 	xor ecx, ecx			; Current stack number; start at 0
 top_of_stack:
 	mov bl, byte [pile_pointers+ecx] ; Index of the current stack head
 show_stack_card:
-	and bl, 01111111b		; Filter out shown bit
+	and bx, 01111111b	; Filter out shown bit
 	cmp bl, end_of_stack
 	je nextstack
 
@@ -147,7 +146,7 @@ show_stack_card:
 	add ax, bx
 	call print_card
 
-	cmp ecx, 7h
+	cmp cl, 7h
 	jl dumpstack_nextcard		; Only increment the cursor row if in bottom row
 	add dh,2d			; Increment cursor row only on bottom row
 
@@ -156,12 +155,12 @@ dumpstack_nextcard:
 	jmp show_stack_card
 
 nextstack:
-	cmp ecx, 13d
+	cmp cl, 13d
 	je stackdone
 
-	inc ecx
+	inc cl
 
-	cmp ecx, 7h			; What stack are we processing?
+	cmp cl, 7h			; What stack are we processing?
 	je next_stack_first_bottom_row	; Beginning of bottom row?
 	jl next_stack_top_row		; Still on the top row?
 					; Otherwise we are on the bottom row
