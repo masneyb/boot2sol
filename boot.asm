@@ -4,60 +4,61 @@
 
   BITS 16
 
-  mov ax, 07C0h  ; Where we're loaded
-  mov ds, ax  ; Data segment
+  mov ax, 07C0h		; Where we're loaded
+  mov ds, ax		; Data segment
 
-  mov ax, 9000h  ; Set up stack
+  mov ax, 9000h		; Set up stack
   mov ss, ax
-  mov sp, 0FFFFh  ; Grows downwards!
+  mov sp, 0FFFFh	; Grows downwards!
 
-  mov ah, 0  ; Set video mode routine
-  mov al, 12h  ; 12h = G  80x30  8x16  640x480   16/256K  .   A000 VGA,ATI VIP
-  int 10h    ; Call BIOS
+  mov ah, 0		; Set video mode routine
+  mov al, 12h		; 12h = G  80x30  8x16  640x480   16/256K  .   A000 VGA,ATI VIP
+  int 10h		; Call BIOS
 
   mov dh, 5d
   mov dl, 10d
   mov ax, card
-  ;call print_card
   call print_lower_stacks
+
 ;	jmp loopy
+; loopy:
+; 	mov ah, 0
+; 	int 16h
+; 	cmp al, 'd'
+; 	je main_draw
+; 
+; 	cmp al, 'm'
+; 	je main_move
+; 
+; 	call print_invalid_op
+;   jmp loopy
+; 
+; print_invalid_op:
+; 	mov dl, 0d
+; 	mov dh, 0d
+; 	mov bl, 4d
+; 	mov bh, 0d
+; 	mov ah, 02h
+; 	int 10h
+; 
+; 	mov si, invalid_op
+;   mov ah, 0Eh
+;   .loop:
+;       lodsb
+;       cmp al, 0x00
+;       je .done
+;       int 10h
+;       jmp .loop
+;   .done:
+;       ret
+; 
+; main_draw:
+; 	jmp loopy
+; 
+; main_move:
+; 	jmp loopy
 
-loopy:
-	mov ah, 0
-	int 16h
-	cmp al, 'd'
-	je main_draw
-
-	cmp al, 'm'
-	je main_move
-
-	call print_invalid_op
-  jmp loopy
-
-print_invalid_op:
-	mov dl, 0d
-	mov dh, 0d
-	mov bl, 4d
-	mov bh, 0d
-	mov ah, 02h
-	int 10h
-
-	mov si, invalid_op
-  mov ah, 0Eh
-  .loop:
-      lodsb
-      cmp al, 0x00
-      je .done
-      int 10h
-      jmp .loop
-  .done:
-      ret
-
-main_draw:
-	jmp loopy
-
-main_move:
-	jmp loopy
+; ---------------------------------------------------------------------------
 
 print_card:
   pusha
