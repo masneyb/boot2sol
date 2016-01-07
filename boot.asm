@@ -6,6 +6,7 @@
 %define bottom_row_num	9d
 %define first_stack_col 5d
 %define stack_spacing	10d
+%define all_cards_len	104d
 
   BITS 16
 
@@ -151,18 +152,18 @@ findcard:
 	shr al, 4d
 	cmp al, ch
 	je stackmatch
-	add bx,2			; Move card pointer
-	cmp bx, first_card + 104d	; End of cards?
+	add bx,2				; Move card pointer
+	cmp bx, first_card + all_cards_len	; End of cards?
 	je next_stack
 	jmp findcard
 
 stackmatch:
-	mov al, [bx]			; Fetch the card pile position
+	mov al, [bx]				; Fetch the card pile position
 	and al, 00011111b
 	cmp al, cl
 	je cardmatch
-	add bx,2d			; Move card pointer
-	cmp bx, first_card + 104d	; End of cards?
+	add bx,2d				; Move card pointer
+	cmp bx, first_card + all_cards_len	; End of cards?
 	je next_stack
 	jmp findcard
 
