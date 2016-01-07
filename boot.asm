@@ -170,6 +170,7 @@ cardmatch:
 	jmp findcard
 
 next_stack:			;we have finished one stack, increment stack, if < 14 continue, else done
+	mov bx, first_card		; Reset pointer to beginning of cards
 	inc ch
 	cmp ch, 14d
 	je finished
