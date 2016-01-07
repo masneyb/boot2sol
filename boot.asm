@@ -78,27 +78,29 @@ move_command:
 print_card:
   ; FIXME - show -- if the card is not shown
 
-  pusha					; Save all registers
+  pusha
+
   call fetch_card_value
   push cx				; Save the current card value
   call fetch_card_family
-  mov bl, byte [family_colors+ecx]
-  pop ax				; Get the previously saved card value
-  mov al, byte [card_values+eax]
-  call print_char			; Print the card value (i.e. 2, 3, K, etc)
-  mov al, byte [family_symbols+ecx]
-  inc dl				; Move cursor over one for family
-  call print_char			; Print card family
-  popa
-  ret
 
-print_char:
-  pusha
+  ; Set cursor position
   mov ah, 02h		; Set cursor position
   xor bh, bh		; Page number 0
+  mov bl, byte [family_colors+ecx]
   int 10h
+
+  ; Display the card value...
+  pop ax				; Get the previously saved card value
+  mov al, byte [card_values+eax]
   mov ah, 0eh		; Teletype output
   int 10h
+
+  ; And the card family symbol...
+  mov al, byte [family_symbols+ecx]
+  mov ah, 0eh		; Teletype output
+  int 10h
+
   popa
   ret
 
