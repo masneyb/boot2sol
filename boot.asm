@@ -75,9 +75,9 @@ move_command:
 ; ---------------------------------------------------------------------------
 
 print_status_message:
-  xor dx, dx
+  xor dx, dx    ; row 0, column 0
   mov bx, 4d
-  mov ah, 02h
+  mov ah, 02h	; set cursor position
   int 10h
 
   mov si, [status_message]
@@ -112,10 +112,10 @@ print_card:
 
 print_char:
   pusha
-  mov ah, 02h
-  xor bh, bh
+  mov ah, 02h		; Set cursor position
+  xor bh, bh		; Page number 0
   int 10h
-  mov ah, 0eh
+  mov ah, 0eh		; Teletype output
   int 10h
   popa
   ret
