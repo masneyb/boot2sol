@@ -32,7 +32,17 @@ game_loop:
   mov ax, 0600h		; Clear the screen
   int 10h
 
-  call print_status_message
+  ; Print status message. First set the cursor
+  xor dx, dx		; row 0, column 0
+  mov bx, 4d
+  mov ah, 02h		; set cursor position
+  int 10h
+
+  ; Now show the message
+  mov al, [status_message]
+  mov ah, 0eh		; Teletype output
+  int 10h
+
   call print_stacks
   jmp process_keyboard_input
 
@@ -62,19 +72,6 @@ draw_command:
 move_command:
   mov [status_message], byte move_message
   jmp game_loop
-
-; ---------------------------------------------------------------------------
-
-print_status_message:
-  xor dx, dx    ; row 0, column 0
-  mov bx, 4d
-  mov ah, 02h	; set cursor position
-  int 10h
-
-  mov al, [status_message]
-  mov ah, 0eh
-  int 10h
-  ret
 
 ; ---------------------------------------------------------------------------
 
