@@ -64,6 +64,8 @@
 ; ---------------------------------------------------------------------------
 
 print_card:
+  ; FIXME - show -- if the card is not shown
+
   pusha					; Save all registers
   call fetch_card_value
   push cx				; Save the current card value
@@ -139,6 +141,9 @@ fetch_card_pile_pos:
 	;; as this subroutine will be used 7 times make sure it can be called for each stack
 print_stacks:
 	pusha
+
+	;; FIXME - clear screen
+
 	;; need to store the pile number somewhere
 	;; need to store the current card number somewhere this corresponds to the position in stack
 	mov ch, 0h		;the current stack - will iterate from 0-13
