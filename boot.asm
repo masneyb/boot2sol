@@ -86,33 +86,33 @@ print_char:
 
 fetch_card_pile:
   mov cl, byte [eax+1]
-  shr cl, 4
-  mov ch, 0
+  shr cl, 4d
+  mov ch, 0d
   ret
 
 fetch_card_value:
   mov cl, byte [eax+1]
-  shl cl, 4
-  shr cl, 4
-  mov ch, 0
+  shl cl, 4d
+  shr cl, 4d
+  mov ch, 0d
   ret
 
 fetch_card_family:
   mov cl, byte [eax]
-  shr cl, 6
-  mov ch, 0
+  shr cl, 6d
+  mov ch, 0d
   ret
 
 fetch_card_shown:
   mov dl, byte [eax]
-  shl dl, 2
-  shr dl, 7
+  shl dl, 2d
+  shr dl, 7d
   ret
 
 fetch_card_pile_pos:
   mov dl, byte [eax]
-  shl dl, 3
-  shr dl, 3
+  shl dl, 3d
+  shr dl, 3d
   ret
 
 ; ---------------------------------------------------------------------------
@@ -141,11 +141,11 @@ print_lower_stacks:
 findcard:
 	mov al, [bx+1]
 	and al, 11110000b
-	shr al, 4
+	shr al, 4d
 	cmp al, ch
 	je stackmatch
 	add bx,2
-	cmp bx, card + 104
+	cmp bx, card + 104d
 	je next_stack
 	jmp findcard
 
@@ -154,21 +154,21 @@ stackmatch:
 	and al, 00011111b
 	cmp al, cl
 	je cardmatch
-	add bx,2
-	cmp bx, card + 104
+	add bx,2d
+	cmp bx, card + 104d
 	je next_stack
 	jmp findcard
 
 cardmatch:
 	mov ax, bx
 	call print_card
-	add dh,2
+	add dh,2d
 	inc cl
 	jmp findcard
 
 next_stack:			;we have finished one stack, increment stack, if < 14 continue, else done
 	inc ch
-	cmp ch, 14
+	cmp ch, 14d
 	je finished
 	mov cl, 0d
 	add dl, 4d
