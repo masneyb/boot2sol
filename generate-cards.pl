@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-my $end_ptr = "11111111";
+my $end_ptr = "1111111";
 
 my %families;
 $families{"11"} = "H";
@@ -33,9 +33,9 @@ sub show_card {
   my ($value, $shown, $next_ptr, $debug) = @_;
 
   my ($card_value, $family) = $value =~ /^([01]{4})_([01]{2})/;
-  my $label = $card_values{$card_value} . $families{$family} . $shown_values{$shown} . $debug . " - " . sprintf("%08b", $current_card_index);
+  my $label = $card_values{$card_value} . $families{$family} . $shown_values{$shown} . $debug . " - " . sprintf("%07b", $current_card_index);
 
-  print "  dw " . $family . "_" . $shown . "_0_" . $card_value . "_" . $next_ptr . "b ; $label\n";
+  print "  dw " . $family . "_0_0_" . $card_value . "_" . $shown . "_" . $next_ptr . "b ; $label\n";
   $current_card_index += 2;
 }
 
@@ -55,8 +55,8 @@ foreach my $val (keys %card_value_family_hash) {
 
 print "first_card";
 
-my @stack_pointers;
-$stack_pointers[0] = "00000000";
+my @pile_pointers;
+$pile_pointers[0] = "00000000";
 
 for (my $i = 0; $i < 23; $i++) {
 	my $val = pop @stack;
@@ -65,34 +65,37 @@ for (my $i = 0; $i < 23; $i++) {
 	$debug = " - Top of deck stack" if $i == 0;
 
 	my $next_ptr;
+	my $shown;
 	if ($i == 22) {
+		$shown = "1";
 		$next_ptr = $end_ptr;
        	}
 	else {
-		$next_ptr = sprintf("%08b", $current_card_index + 2);
+		$shown = "0";
+		$next_ptr = sprintf("%07b", $current_card_index + 2);
 	}
 
-	show_card($val, "0", $next_ptr, $debug);
+	show_card($val, $shown, $next_ptr, $debug);
 }
 
-$stack_pointers[1] = sprintf("%08b", $current_card_index);
+$pile_pointers[1] = sprintf("%07b", $current_card_index);
 my $drawn = pop @stack;
 show_card($drawn, "1", $end_ptr, " - Drawn card");
 
-$stack_pointers[2] = $end_ptr;
-$stack_pointers[3] = $end_ptr;
-$stack_pointers[4] = $end_ptr;
-$stack_pointers[5] = $end_ptr;
-$stack_pointers[6] = $end_ptr;
+$pile_pointers[2] = $end_ptr;
+$pile_pointers[3] = $end_ptr;
+$pile_pointers[4] = $end_ptr;
+$pile_pointers[5] = $end_ptr;
+$pile_pointers[6] = $end_ptr;
 
 my $num_hidden = 0;
 for (my $stack = 7; $stack <= 13; $stack++) {
-	$stack_pointers[$stack] = sprintf("%08b", $current_card_index);
+	$pile_pointers[$stack] = sprintf("%07b", $current_card_index);
 	for ($i = 0; $i < $num_hidden; $i++) {
 		my $debug = "";
 		$debug = " - Beginning of stack $stack" if $i == 0;
 		my $val = pop @stack;
-		my $next_ptr = sprintf("%08b", $current_card_index + 2);
+		my $next_ptr = sprintf("%07b", $current_card_index + 2);
 		show_card($val, "0", $next_ptr, $debug);
 	}
 
@@ -104,8 +107,8 @@ for (my $stack = 7; $stack <= 13; $stack++) {
 	$num_hidden++;
 }
 
-print "\nstack_pointers";
+print "\npile_pointers";
 for ($i = 0; $i < 14; $i++) {
-  print "  db " . $stack_pointers[$i] . "b\n";
+  print "  db " . $pile_pointers[$i] . "b\n";
 }
 
