@@ -10,43 +10,63 @@
 
   BITS 16
 
-  mov ax, 07C0h		; Where we're loaded
+  ; Set this so that the CS register is set
+  ; https://stackoverflow.com/questions/34548325/near-call-jump-tables-dont-always-work-in-a-bootloader
+  jmp 0x07c0:$+5
+
+  mov ax, 0x07c0	; Where we're loaded
   mov ds, ax		; Data segment
 
-  mov ax, 9000h		; Set up stack
+  mov ax, 0x9000	; Set up stack
   mov ss, ax
-  mov sp, 0FFFFh	; Grows downwards!
+  mov sp, 0x0ffff	; Grows downwards!
 
   mov ah, 0		; Set video mode routine
   mov al, 12h		; 12h = G  80x30  8x16  640x480   16/256K  .   A000 VGA,ATI VIP
   int 10h		; Call BIOS
 
 game_loop:
+  ; FIXME - clear screen
   call print_status_message
   call print_stacks
-
-  mov [status_message], word invalid_op_message
+  call process_keyboard_input
   jmp game_loop
 
-;	jmp loopy
-; loopy:
-; 	mov ah, 0
-; 	int 16h
-; 	cmp al, 'd'
-; 	je main_draw
-; 
-; 	cmp al, 'm'
-; 	je main_move
-; 
-; 	call print_invalid_op_message
-;   jmp loopy
-; 
-; 
-; main_draw:
-; 	jmp loopy
-; 
-; main_move:
-; 	jmp loopy
+; ---------------------------------------------------------------------------
+
+process_keyboard_input:
+  mov ah, 0
+  int 16h
+
+  mov ecx, 0
+check_key:
+  mov dl, byte [key_inputs+ecx]
+  cmp dl, 0x0
+  je key_not_mapped
+
+  cmp al, [key_inputs+ecx]
+  je key_found
+  inc ecx
+  jmp check_key
+key_found:
+  call [key_actions+2*ecx]
+  jmp keydone
+key_not_mapped:
+  mov [status_message], word invalid_op_message
+keydone:
+  ret
+
+; ---------------------------------------------------------------------------
+
+draw_command:
+  mov [status_message], word draw_message
+  ret
+
+; ---------------------------------------------------------------------------
+
+move_command:
+  mov [status_message], word move_message
+  ret
 
 ; ---------------------------------------------------------------------------
 
@@ -121,19 +141,19 @@ fetch_card_family:
   mov ch, 0d
   ret
 
-fetch_card_shown:
-  mov cl, byte [eax]
-  shl cl, 2d
-  shr cl, 7d
-  mov ch, 0d
-  ret
-
-fetch_card_pile_pos:
-  mov cl, byte [eax]
-  shl cl, 3d
-  shr cl, 3d
-  mov ch, 0d
-  ret
+;fetch_card_shown:
+;  mov cl, byte [eax]
+;  shl cl, 2d
+;  shr cl, 7d
+;  mov ch, 0d
+;  ret
+;
+;fetch_card_pile_pos:
+;  mov cl, byte [eax]
+;  shl cl, 3d
+;  shr cl, 3d
+;  mov ch, 0d
+;  ret
 
 ; ---------------------------------------------------------------------------
 
@@ -151,8 +171,6 @@ fetch_card_pile_pos:
 	;; as this subroutine will be used 7 times make sure it can be called for each stack
 print_stacks:
 	pusha
-
-	;; FIXME - clear screen
 
 	;; need to store the pile number somewhere
 	;; need to store the current card number somewhere this corresponds to the position in stack
@@ -227,7 +245,6 @@ finished:
   ; ---------------------------------------------------------------------------
 
 
-.data:
   card_values db ' A23456789TJQK'
   family_colors db 7d, 7d, 4d, 4d
   family_symbols db 'CSDH'
@@ -325,8 +342,13 @@ finished:
   ; JD                         
 
   status_message dw ok_message
-  ok_message db 'Ready', 0x00
-  invalid_op_message db 'NO', 0x00
+  ok_message db 'OK', 0x0
+  invalid_op_message db 'NO', 0x0
+  draw_message db 'DR', 0x0
+  move_message db 'MV', 0x0
+
+  key_inputs db 'dm', 0x00
+  key_actions dw draw_command, move_command
 
   times 510-($-$$) db 0
   dw 0AA55h  ; Boot signature
