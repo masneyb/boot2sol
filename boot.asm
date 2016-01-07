@@ -166,7 +166,7 @@ cardmatch:
 	call print_card
 	add dh,2d			; Increment cursor row
 	inc cl				; Next card number
-	; FIXME - add bx,2d                       ; Move card pointer
+	add bx,2d                       ; Move card pointer
 	jmp findcard
 
 next_stack:			;we have finished one stack, increment stack, if < 14 continue, else done
