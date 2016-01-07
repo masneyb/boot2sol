@@ -65,7 +65,8 @@ process_keyboard_input:
   jmp game_loop
 
 ; ---------------------------------------------------------------------------
-
+; TODO: This does not yet handle drawing to the last card
+; and it does not handle putting the old card back in the deck
 draw_command:
   xor cx, cx
   xor ax, ax
