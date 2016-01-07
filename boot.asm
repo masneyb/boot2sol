@@ -17,7 +17,7 @@
 
   mov dh, 5d
   mov dl, 10d
-  mov ax, card
+
   call print_lower_stacks
 
 ;	jmp loopy
@@ -65,11 +65,11 @@ print_card:
   call fetch_card_value
   push cx
   call fetch_card_family
-  mov bl, byte [colors+ecx]
+  mov bl, byte [family_colors+ecx]
   pop ax
-  mov al, byte [fv+eax]
+  mov al, byte [card_values+eax]
   call print_char
-  mov al, byte [symbols+ecx]
+  mov al, byte [family_symbols+ecx]
   inc dl
   call print_char
   popa
@@ -136,7 +136,7 @@ print_lower_stacks:
 	;; need to store the current card number somewhere this corresponds to the position in stack
 	mov ch, 7h		;the current stack - will iterate from 7-13
 	mov cl, 0d 		;current card number
-	mov bx, card		;current mem location (gets incremented by 2 each iteration) (from 152 - 256)
+	mov bx, first_card		;current mem location (gets incremented by 2 each iteration) (from 152 - 256)
 	mov dh, 11d
 	mov dl, 5d
 findcard:
@@ -146,7 +146,7 @@ findcard:
 	cmp al, ch
 	je stackmatch
 	add bx,2
-	cmp bx, card + 104d
+	cmp bx, first_card + 104d
 	je next_stack
 	jmp findcard
 
@@ -156,7 +156,7 @@ stackmatch:
 	cmp al, cl
 	je cardmatch
 	add bx,2d
-	cmp bx, card + 104d
+	cmp bx, first_card + 104d
 	je next_stack
 	jmp findcard
 
@@ -185,6 +185,10 @@ finished:
 
 
 .data:
+  card_values db ' A23456789TJQK'
+  family_colors db 7d, 7d, 4d, 4d
+  family_symbols db 'CSDH'
+
   ; Pile - 4 bits
   ; - 0-6 top row piles (2 is always empty)
   ; Card - 4 bits
@@ -199,10 +203,7 @@ finished:
   ; Shown? - 1 bit
   ; Position in current pile - 5 bits
 
-  fv db ' A23456789TJQK'
-  colors db 7d, 7d, 4d, 4d
-  symbols db 'CSDH'
-  card dw 1101_1010_01_0_00000b
+  first_card dw 1101_1010_01_0_00000b
   dw 1101_1100_01_0_00001b
   dw 1101_0011_00_0_00010b
   dw 1101_0111_11_0_00011b
