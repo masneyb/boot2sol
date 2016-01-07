@@ -287,10 +287,10 @@ stackdone:
   db 1011010b
 
   status_message dw ok_message
-  ok_message db 'OK', 0x0
-  invalid_op_message db 'NO', 0x0
-  draw_message db 'DR', 0x0
-  move_message db 'MV', 0x0
+  ok_message db 'O', 0x0
+  invalid_op_message db '!', 0x0
+  draw_message db 'D', 0x0
+  move_message db 'M', 0x0
 
   key_inputs db 'dm', 0x00
   key_actions dw draw_command, move_command
