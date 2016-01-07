@@ -13,7 +13,7 @@ run: floppy
 	qemu-system-i386 floppy.img
 
 objdump: boot
-	objdump -D -b binary -mi386 -Maddr16,data16 boot.bin
+	objdump -mi8086 -Mintel -D -b binary boot.bin --adjust-vma 0x7c00
 
 clean:
 	rm -f boot.bin floppy.img sol sol.o
