@@ -275,8 +275,5 @@ stackdone:
 
   status_message db ok_message
 
-  key_inputs db 'dm', 0x00
-  key_actions dw draw_command, move_command
-
   times 510-($-$$) db 0
   dw 0AA55h  ; Boot signature
