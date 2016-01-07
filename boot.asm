@@ -249,11 +249,6 @@ finished:
   family_colors db 7d, 7d, 4d, 4d
   family_symbols db 'CSDH'
 
-  ; Pile - 4 bits
-  ; - 0-6 top row piles (2 is always empty)
-  ; Card - 4 bits
-  ; - A=1, 2, 3-10, J=11, Q=12, K=13
-
   ; Family - 2 bits
   ; - 1 1 hearts
   ; - 1 0 diamond
@@ -261,7 +256,10 @@ finished:
   ; - 0 0 clubs
   ; - First bit is the color (1=black, 0=red)
   ; Shown? - 1 bit
-  ; Position in current pile - 5 bits
+  ; Unused - 1 bit
+  ; Card - 4 bits
+  ; - A=1, 2, 3-10, J=11, Q=12, K=13
+  ; Pointer to next - 8 bits - 0xff - end of list
 
   first_card dw 1101_1001_00_0_00000b ; 9C 
   dw 1101_1101_01_0_00001b ; KS 

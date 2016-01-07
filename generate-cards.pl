@@ -1,5 +1,7 @@
 #!/usr/bin/perl -w
 
+my $end_ptr = "11111111";
+
 my %families;
 $families{"11"} = "H";
 $families{"10"} = "D";
@@ -25,16 +27,16 @@ my %shown_values;
 $shown_values{"1"} = "+";
 $shown_values{"0"} = " ";
 
-my %hash;
+my $current_card_index = 0;
 
 sub show_card {
-  my $bits = shift;
+  my ($value, $shown, $next_ptr, $debug) = @_;
 
-  my ($pile, $card_value, $family, $shown, $pile_pos) = $bits =~ /^([01]{4})_([01]{4})_([01]{2})_([01])_([01]{5})/;
-  my $key = $pile . "_" . $pile_pos;
-  my $label = $card_values{$card_value} . $families{$family} . $shown_values{$shown};
-  $hash{$key} = $label;
-  printf("  dw %sb ; $label\n", $bits);
+  my ($card_value, $family) = $value =~ /^([01]{4})_([01]{2})/;
+  my $label = $card_values{$card_value} . $families{$family} . $shown_values{$shown} . $debug . " - " . sprintf("%08b", $current_card_index);
+
+  print "  dw " . $family . "_" . $shown . "_0_" . $card_value . "_" . $next_ptr . "b ; $label\n";
+  $current_card_index += 2;
 }
 
 
@@ -51,35 +53,59 @@ foreach my $val (keys %card_value_family_hash) {
   push (@stack, $val);
 }
 
-my $num_hidden = 6;
-for (my $stack = 13; $stack >= 7; $stack--) {
-	for ($i = 0; $i < $num_hidden; $i++) {
-		my $val = pop @stack;
-                show_card(sprintf("%04b_%s_0_%05b", $stack, $val, $i));
-	}
-	my $val = pop @stack;
-	show_card(sprintf("%04b_%s_1_%05b", $stack, $val, $num_hidden));
-	$num_hidden--;
-}
+print "first_card";
 
-my $drawn = pop @stack;
-show_card(sprintf("0001_%s_1_00000", $drawn));
+my @stack_pointers;
+$stack_pointers[0] = "00000000";
 
 for (my $i = 0; $i < 23; $i++) {
 	my $val = pop @stack;
-	show_card(sprintf("0000_%s_0_%05b", $val, $i));
+
+	my $debug = '';
+	$debug = " - Top of deck stack" if $i == 0;
+
+	my $next_ptr;
+	if ($i == 22) {
+		$next_ptr = $end_ptr;
+       	}
+	else {
+		$next_ptr = sprintf("%08b", $current_card_index + 2);
+	}
+
+	show_card($val, "0", $next_ptr, $debug);
 }
 
-print "  ; Card positions. Cards with a + are shown.\n";
-for (my $pile_pos = 0; $pile_pos < 23; $pile_pos++) {
-  print "  ; ";
-  for (my $stack = 0; $stack < 14; $stack++) {
-    my $key = sprintf("%04b_%05b", $stack, $pile_pos);
-    my $label = $hash{$key};
-    $label = "   " if !defined ($label);
-    print $label;
-    print " ";
-  }
-  print "\n";
+$stack_pointers[1] = sprintf("%08b", $current_card_index);
+my $drawn = pop @stack;
+show_card($drawn, "1", $end_ptr, " - Drawn card");
+
+$stack_pointers[2] = $end_ptr;
+$stack_pointers[3] = $end_ptr;
+$stack_pointers[4] = $end_ptr;
+$stack_pointers[5] = $end_ptr;
+$stack_pointers[6] = $end_ptr;
+
+my $num_hidden = 0;
+for (my $stack = 7; $stack <= 13; $stack++) {
+	$stack_pointers[$stack] = sprintf("%08b", $current_card_index);
+	for ($i = 0; $i < $num_hidden; $i++) {
+		my $debug = "";
+		$debug = " - Beginning of stack $stack" if $i == 0;
+		my $val = pop @stack;
+		my $next_ptr = sprintf("%08b", $current_card_index + 2);
+		show_card($val, "0", $next_ptr, $debug);
+	}
+
+	my $debug = "";
+	$debug = " - Beginning of stack $stack" if $num_hidden == 0;
+
+	my $val = pop @stack;
+	show_card($val, "1", $end_ptr, $debug);
+	$num_hidden++;
+}
+
+print "\nstack_pointers";
+for ($i = 0; $i < 14; $i++) {
+  print "  db " . $stack_pointers[$i] . "b\n";
 }
 
