@@ -17,10 +17,6 @@
 
   BITS 16
 
-  ; Set this so that the CS register is set
-  ; https://stackoverflow.com/questions/34548325/near-call-jump-tables-dont-always-work-in-a-bootloader
-  jmp 0x07c0:$+5
-
   mov ax, 0x07c0	; Where we're loaded
   mov ds, ax		; Data segment
 
