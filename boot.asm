@@ -130,9 +130,8 @@ print_stacks:
 	mov dh, top_row_num     	; Current cursor row
 	mov dl, first_stack_col 	; Current cursor column
 
-	xor eax, eax
-	xor ebx, ebx
-	xor ecx, ecx
+	xor bh, bh
+	xor ecx, ecx			; Current stack number; start at 0
 top_of_stack:
 	mov bl, byte [pile_pointers+ecx] ; Index of the current stack head
 show_stack_card:
