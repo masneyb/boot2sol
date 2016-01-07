@@ -34,7 +34,7 @@ sub show_card {
   my $key = $pile . "_" . $pile_pos;
   my $label = $card_values{$card_value} . $families{$family} . $shown_values{$shown};
   $hash{$key} = $label;
-  printf("  dw %sb\n", $bits);
+  printf("  dw %sb ; $label\n", $bits);
 }
 
 
