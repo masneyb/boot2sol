@@ -1,4 +1,4 @@
-boot:
+boot: boot.asm
 	nasm -f bin -o boot.bin boot.asm
 
 sol: sol.asm
@@ -11,6 +11,9 @@ floppy: clean boot
 
 run: floppy
 	qemu-system-i386 floppy.img
+
+objdump: boot
+	objdump -D -b binary -mi386 -Maddr16,data16 boot.bin
 
 clean:
 	rm -f boot.bin floppy.img sol sol.o
