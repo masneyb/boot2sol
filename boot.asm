@@ -155,7 +155,7 @@ print_stacks:
 	mov ebx, 0h			; Clear 32 bit register
 	mov ecx, 0d			; The current stack - will iterate from 0-13
 top_of_stack:
-	mov bl, byte [stack_pointers+ecx] ; Index of the current stack head
+	mov bl, byte [pile_pointers+ecx] ; Index of the current stack head
 show_stack_card:
 	cmp bl, end_of_stack
 	je nextstack
@@ -273,7 +273,7 @@ stackdone:
   dw 11_0_0_1001_01100110b ; 9H  - 01100100
   dw 11_1_0_1011_11111111b ; JH+ - 01100110
 
-  stack_pointers db 00000000b
+  pile_pointers db 00000000b
   db 00101110b
   db 11111111b
   db 11111111b
