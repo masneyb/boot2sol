@@ -23,13 +23,12 @@
   mov ss, ax
   mov sp, 0x0ffff	; Grows downwards!
 
-  mov ah, 0		; Set video mode routine
-  mov al, 12h		; 12h = G  80x30  8x16  640x480   16/256K  .   A000 VGA,ATI VIP
+  mov ax, 12h           ; high = 0, set video mode routine
+  			; low = 12h = G  80x30  8x16  640x480   16/256K  .   A000 VGA,ATI VIP
   int 10h		; Call BIOS
 
 game_loop:
-  mov ah, 06h		; Clear the screen
-  mov al, 0
+  mov ax, 0600h		; Clear the screen
   int 10h
 
   call print_status_message
@@ -40,10 +39,10 @@ game_loop:
 ; ---------------------------------------------------------------------------
 
 process_keyboard_input:
-  mov ah, 0
+  xor ah, ah
   int 16h
 
-  mov ecx, 0
+  xor ecx, ecx
 check_key:
   mov dl, byte [key_inputs+ecx]
   cmp dl, 0x0
@@ -76,15 +75,13 @@ move_command:
 ; ---------------------------------------------------------------------------
 
 print_status_message:
-  mov dl, 0d
-  mov dh, 0d
-  mov bl, 4d
-  mov bh, 0d
+  xor dx, dx
+  mov bx, 4d
   mov ah, 02h
   int 10h
 
   mov si, [status_message]
-  mov ah, 0Eh
+  mov ah, 0eh
 .loop:
   lodsb
   cmp al, 0x00
@@ -116,9 +113,9 @@ print_card:
 print_char:
   pusha
   mov ah, 02h
-  mov bh, 0
+  xor bh, bh
   int 10h
-  mov ah, 0Eh
+  mov ah, 0eh
   int 10h
   popa
   ret
@@ -129,20 +126,20 @@ fetch_card_value:
   mov cl, byte [eax+1]
   shl cl, 4d
   shr cl, 4d
-  mov ch, 0d
+  xor ch, ch
   ret
 
 fetch_card_family:
   mov cl, byte [eax+1]
   shr cl, 6d
-  mov ch, 0d
+  xor ch, ch
   ret
 
 ;fetch_card_shown:
 ;  mov cl, byte [eax]
 ;  shl cl, 2d
 ;  shr cl, 7d
-;  mov ch, 0d
+;  xor ch, ch
 ;  ret
 
 ; ---------------------------------------------------------------------------
@@ -151,9 +148,9 @@ print_stacks:
 	mov dh, top_row_num     	; Current cursor row
 	mov dl, first_stack_col 	; Current cursor column
 
-	mov eax, 0h			; Clear 32 bit register
-	mov ebx, 0h			; Clear 32 bit register
-	mov ecx, 0d			; The current stack - will iterate from 0-13
+	xor eax, eax
+	xor ebx, ebx
+	xor ecx, ecx
 top_of_stack:
 	mov bl, byte [pile_pointers+ecx] ; Index of the current stack head
 show_stack_card:
