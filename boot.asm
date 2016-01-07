@@ -155,7 +155,7 @@ stackmatch:
 	cmp al, cl
 	je cardmatch
 	add bx,2
-	cmp bx, card + 52
+	cmp bx, card + 104
 	je next_stack
 	jmp findcard
 
@@ -166,9 +166,9 @@ cardmatch:
 	inc cl
 	jmp findcard
 
-next_stack:			;we have finished one stack, increment stack, if < 13 continue, else done
+next_stack:			;we have finished one stack, increment stack, if < 14 continue, else done
 	inc ch
-	cmp ch, 00001101b
+	cmp ch, 14
 	je finished
 	mov cl, 0d
 	add dl, 4d
