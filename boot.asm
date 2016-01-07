@@ -65,7 +65,7 @@ keydone:
 check_win_state:
   mov dl, 3
 .loop:
-  mov ax, [stack_pointers+edl]
+  mov ax, [stack_pointers+edx]
   cmp ax, 255d
   je .no_win
   mov ax, [first_card+eax]
