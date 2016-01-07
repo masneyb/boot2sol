@@ -29,6 +29,8 @@
   int 10h		; Call BIOS
 
 game_loop:
+  mov cl, 0
+  mov dl, 0xFF
   mov ax, 0600h		; Clear the screen
   xor bx, bx
   int 10h
@@ -65,9 +67,25 @@ process_keyboard_input:
 ; ---------------------------------------------------------------------------
 
 draw_command:
-  mov ah, byte [pile_pointers]
-  mov al, byte [pile_pointers+1]
-  mov [pile_pointers+1], byte ah
+  xor cx, cx
+  xor ax, ax
+  xor dx, dx
+  mov al, [pile_pointers]
+.loop:
+  mov bx, [first_card+eax]
+  cmp bl, 0xFF
+  je .break
+  mov cx, dx
+  mov dx, bx
+  and bl, 01111111b
+  mov al, bl
+  jmp .loop
+.break:
+  and dl, 01111111b
+  mov [pile_pointers+1], byte dl
+  xor ch, ch
+  and cl, 01111111b
+  mov [first_card+ecx], byte 0xFF
   mov [status_message], byte draw_message
   jmp game_loop
 
