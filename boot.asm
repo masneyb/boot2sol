@@ -21,7 +21,12 @@
   mov al, 12h		; 12h = G  80x30  8x16  640x480   16/256K  .   A000 VGA,ATI VIP
   int 10h		; Call BIOS
 
+game_loop:
+  call print_status_message
   call print_stacks
+
+  mov [status_message], word invalid_op_message
+  jmp game_loop
 
 ;	jmp loopy
 ; loopy:
@@ -33,33 +38,38 @@
 ; 	cmp al, 'm'
 ; 	je main_move
 ; 
-; 	call print_invalid_op
+; 	call print_invalid_op_message
 ;   jmp loopy
 ; 
-; print_invalid_op:
-; 	mov dl, 0d
-; 	mov dh, 0d
-; 	mov bl, 4d
-; 	mov bh, 0d
-; 	mov ah, 02h
-; 	int 10h
-; 
-; 	mov si, invalid_op
-;   mov ah, 0Eh
-;   .loop:
-;       lodsb
-;       cmp al, 0x00
-;       je .done
-;       int 10h
-;       jmp .loop
-;   .done:
-;       ret
 ; 
 ; main_draw:
 ; 	jmp loopy
 ; 
 ; main_move:
 ; 	jmp loopy
+
+; ---------------------------------------------------------------------------
+
+print_status_message:
+  ; FIXME - handle empty status messages. Truncate ok_message to 0 once done.
+
+  mov dl, 0d
+  mov dh, 0d
+  mov bl, 4d
+  mov bh, 0d
+  mov ah, 02h
+  int 10h
+
+  mov si, [status_message]
+  mov ah, 0Eh
+.loop:
+  lodsb
+  cmp al, 0x00
+  je .done
+  int 10h
+  jmp .loop
+.done:
+  ret
 
 ; ---------------------------------------------------------------------------
 
@@ -314,7 +324,9 @@ finished:
   ; 6C                                                      
   ; JD                         
 
-  invalid_op db 'NO', 0x00
+  status_message dw ok_message
+  ok_message db 'Ready', 0x00
+  invalid_op_message db 'NO', 0x00
 
   times 510-($-$$) db 0
   dw 0AA55h  ; Boot signature
