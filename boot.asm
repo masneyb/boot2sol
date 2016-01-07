@@ -148,8 +148,6 @@ fetch_card_family:
 ; ---------------------------------------------------------------------------
 
 print_stacks:
-	pusha
-
 	mov dh, top_row_num     	; Current cursor row
 	mov dl, first_stack_col 	; Current cursor column
 
@@ -200,7 +198,6 @@ next_stack_first_bottom_row:		; We are at the beginning of the
 	jmp top_of_stack
 
 stackdone:
-	popa
 	ret
 
   ; ---------------------------------------------------------------------------
