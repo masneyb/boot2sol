@@ -65,7 +65,7 @@ draw_command:
 
 move_command:
   mov [status_message], byte move_message
-  ret
+  jmp game_loop
 
 ; ---------------------------------------------------------------------------
 
