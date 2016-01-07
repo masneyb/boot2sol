@@ -58,7 +58,47 @@ key_not_mapped:
   mov [status_message], word invalid_op_message
 keydone:
   ret
+; ---------------------------------------------------------------------------
 
+check_win_state:
+  mov dl, 3
+.loop:
+  mov ax, [stack_pointers+edl]
+  cmp ax, 255d
+  je .no_win
+  mov ax, [first_card+eax]
+  call count_stack
+  cmp cl, 0d
+  je .done
+  inc dl
+  cmp dl, 6
+  je .done
+  jmp .loop
+.no_win:
+  mov cl, 0d
+.done:
+  ret
+
+
+count_stack:
+.loop:
+  mov dh, 1
+  mov ax, [eax+1]
+  cmp ax, 255
+  je .check
+  mov ax, [first_card+eax]
+  jmp .loop
+.check:
+  cmp dh, 13d
+  jne .no_win
+  mov cl, 1d
+  jmp .done
+.no_win:
+  mov cl, 0d
+  jmp .done
+.done:
+  mov dh, 0d
+  ret
 ; ---------------------------------------------------------------------------
 
 draw_command:
