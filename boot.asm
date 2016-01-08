@@ -8,7 +8,8 @@
 %define stack_spacing	10d
 %define all_cards_len	104d
 
-%define end_of_pile	01111111b
+%define end_of_pile		01111111b
+%define pile_next_ptr_mask	end_of_pile
 
 %define draw_down_pile_number   0
 %define draw_up_pile_number     1
@@ -39,7 +40,7 @@ print_stacks:
 top_of_stack:
 	mov bl, byte [pile_pointers+ecx] ; Index of the current stack head
 show_stack_card:
-	and bx, 01111111b	; Filter out shown bit
+	and bx, pile_next_ptr_mask	; Filter out shown bit
 	cmp bl, end_of_pile
 	je nextstack
 
@@ -133,7 +134,7 @@ find_bottom_of_pile:
 	jz .break
 
 	mov bl, byte [first_card+eax]
-	and bx, 01111111b
+	and bx, pile_next_ptr_mask
 	cmp bl, end_of_pile
 	je .break
 	mov dx, ax
