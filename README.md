@@ -8,10 +8,10 @@ solitaire within a bootloader. The goal is to boot a PC with a traditional BIOS
 (no EFI) into an interactive game of solitaire.
 
 ## Team Members
-* Brian Sizemore - [@bpsizemore](/bpsizemore)
-* Brian Masney - [@masneyb](/masneyb)
-* Will Austin - [@dreae](/dreae)
-* Ricky Hussmann - [@rhussmann](/rhussmann)
+* Brian Sizemore - [bpsizemore](https://github.com/bpsizemore)
+* Brian Masney - [masneyb](https://github.com/masneyb)
+* Will Austin - [dreae](https://github.com/dreae)
+* Ricky Hussmann - [rhussmann](https://github.com/rhussmann)
 
 ## Technical Requirements
 * Must be written in 16-bit x86 assembly language
