@@ -227,12 +227,25 @@ move_command:
 	mov cl, al			; Store it in our counter
 	sub cl, '0'			; Subtract ASCII '0' to get index
 
+	push dx				; Save the current source pile number since we need it
+					; if the pile becomes empty.
+
 	xor ah, ah
 	mov al, byte [pile_pointers+edx]; Source pile
 	call find_bottom_of_pile
 
-	mov [first_card+edx], byte 0xff	; Set null byte on next to last entry
+	pop cx				; Fetch the current source pile number
 
+        cmp dl, end_of_pile
+        je .move_source_pile_now_empty
+
+	mov [first_card+edx], byte 0xff	; Set null byte on next to last entry
+	jmp .move_save_card
+
+.move_source_pile_now_empty:
+        mov [pile_pointers+ecx], byte end_of_pile
+
+.move_save_card
 	push ax				; Save our card
 
 	xor ah, ah			; Read keyboard input. The destination pile (a-n)
