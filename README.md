@@ -76,8 +76,8 @@ destroy any data you have on your thumb drive.
 
 ## Pile numbering
 
-a | b |   | d | e | f | g |
---|---|---|---|---|---|---|
-h | i | j | k | l | m | n |
+a | b |   | d | e | f | g
+--|---|---|---|---|---|---
+h | i | j | k | l | m | n
 
 
