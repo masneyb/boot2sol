@@ -13,10 +13,10 @@
 %define ok_message		' '
 %define invalid_op_message	'!'
 
-;%define draw_down_pile_number   0
-;%define draw_up_pile_number     1
-%define draw_down_pile_number	13
-%define draw_up_pile_number	7
+%define draw_down_pile_number   0
+%define draw_up_pile_number     1
+;%define draw_down_pile_number	13
+;%define draw_up_pile_number	7
 
 	BITS 16
 
@@ -298,7 +298,7 @@ move_command:
 	dw 10_0_0_1000_0_0000100b ; 8D  - 0000010
 	dw 10_0_0_1010_0_0000110b ; TD  - 0000100
 	dw 11_0_0_0111_0_0001000b ; 7H  - 0000110
-	dw 00_0_0_1000_0_0001010b ; 8C  - 0001000
+	dw 00_0_0_1000_0_1111111b ; 8C  - 0001000
 	dw 11_0_0_1101_1_1111111b ; KH+ - Drawn card - 0001010
 	dw 10_0_0_0010_1_1111111b ; 2D+ - Beginning of stack 7 - 0001100
 	dw 10_0_0_1101_0_0010000b ; KD  - Beginning of stack 8 - 0001110
