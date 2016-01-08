@@ -19,18 +19,24 @@
 	BITS 16
 
 	mov ax, 0x07c0	; Where we're loaded
-	mov ds, ax		; Data segment
+	mov ds, ax	; Data segment
 
 	mov ax, 0x9000	; Set up stack
 	mov ss, ax
 	mov sp, 0x0ffff	; Grows downwards!
 
 game_loop:
-			; Set the video resolution. This also clears
-			; the screen.
-	mov ax, 12h           ; high = 0, set video mode routine
-				; low = 12h = G  80x30  8x16  640x480   16/256K  .   A000 VGA,ATI VIP
-	int 10h		; Call BIOS
+					; Set the video resolution. This also clears
+					; the screen.
+	mov ax, 12h          		; high = 0, set video mode routine
+					; low = 12h = G  80x30  8x16  640x480   16/256K  .   A000 VGA,ATI VIP
+	int 10h
+
+; There are 14 pile positions available. Iterate through each pile's linked
+; list of cards.
+; - The 7 piles at the bottom row grow down as new cards are added
+; - The 7 piles at the top stay at the same row so that only the last card
+;   in the pile is shown.
 
 print_stacks:
 	mov dh, top_row_num     	; Current cursor row
@@ -41,7 +47,7 @@ top_of_stack:
 	mov bl, byte [pile_pointers+ecx] ; Index of the current stack head
 show_stack_card:
 	and bx, pile_next_ptr_mask	; Filter out shown bit
-	cmp bl, end_of_pile
+	cmp bl, end_of_pile		; At end of pile?
 	je nextstack
 
 	mov ax, first_card		; Card with the index
@@ -80,8 +86,8 @@ print_card:
 
 ; Finished printing card
 
-	cmp cl, 7h
-	jl dumpstack_nextcard		; Only increment the cursor row if in bottom row
+	cmp cl, 7h			; Are we at the bottom left pile?
+	jl dumpstack_nextcard		; Only increment the cursor row if on the bottom row
 	add dh,2d			; Increment cursor row only on bottom row
 
 dumpstack_nextcard:
@@ -134,7 +140,7 @@ find_bottom_of_pile:
 	jz .break
 
 	mov bl, byte [first_card+eax]
-	and bx, pile_next_ptr_mask
+	and bx, pile_next_ptr_mask	; Filter out shown bit
 	cmp bl, end_of_pile
 	je .break
 	mov dx, ax
