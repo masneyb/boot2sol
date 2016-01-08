@@ -13,10 +13,10 @@
 %define ok_message		' '
 %define invalid_op_message	'!'
 
-%define draw_down_pile_number   0
-%define draw_up_pile_number     1
-;%define draw_down_pile_number	13
-;%define draw_up_pile_number	7
+;%define draw_down_pile_number   0
+;%define draw_up_pile_number     1
+%define draw_down_pile_number	13
+%define draw_up_pile_number	7
 
 	BITS 16
 
