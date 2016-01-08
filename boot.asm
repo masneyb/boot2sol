@@ -46,10 +46,86 @@ game_loop:
   mov ah, 0eh		; Teletype output
   int 10h
 
-  call print_stacks
-  jmp process_keyboard_input
+print_stacks:
+	mov dh, top_row_num     	; Current cursor row
+	mov dl, first_stack_col 	; Current cursor column
 
-; ---------------------------------------------------------------------------
+	xor cx, cx			; Current stack number; start at 0
+top_of_stack:
+	mov bl, byte [pile_pointers+ecx] ; Index of the current stack head
+show_stack_card:
+	and bx, 01111111b	; Filter out shown bit
+	cmp bl, end_of_pile
+	je nextstack
+
+	mov ax, first_card		; Card with the index
+	add ax, bx
+print_card:
+	pusha
+
+	; Fetch the card value
+	mov cl, byte [eax+1]
+	and cx, 000fh
+	push cx				; Save the current card value
+
+	; Fetch the card family
+	mov cl, byte [eax+1]
+	shr cl, 6d
+	xor ch, ch
+
+	; Set cursor position
+	mov ah, 02h		; Set cursor position
+	xor bh, bh		; Page number 0
+	mov bl, byte [family_colors+ecx]
+	int 10h
+
+	; Display the card value...
+	pop ax				; Get the previously saved card value
+	mov al, byte [card_values+eax]
+	mov ah, 0eh		; Teletype output
+	int 10h
+
+	; And the card family symbol...
+	mov al, byte [family_symbols+ecx]
+	mov ah, 0eh		; Teletype output
+	int 10h
+
+	popa
+
+; Finished printing card
+
+	cmp cl, 7h
+	jl dumpstack_nextcard		; Only increment the cursor row if in bottom row
+	add dh,2d			; Increment cursor row only on bottom row
+
+dumpstack_nextcard:
+	mov bl, byte [eax]		; Update next card pointer
+	jmp show_stack_card
+
+nextstack:
+	cmp cl, 13d
+	je process_keyboard_input
+
+	inc cl
+
+	cmp cl, 7h			; What stack are we processing?
+	je next_stack_first_bottom_row	; Beginning of bottom row?
+	jl next_stack_top_row		; Still on the top row?
+					; Otherwise we are on the bottom row
+	add dl, stack_spacing		; Increment cursor column
+	mov dh, bottom_row_num		; Reset cursor row
+	jmp top_of_stack
+
+next_stack_top_row:
+	add dl, stack_spacing		; Increment cursor column
+	mov dh, top_row_num		; Reset cursor row
+	jmp top_of_stack
+
+next_stack_first_bottom_row:		; We are at the beginning of the
+					; first stack on the bottom row.
+	mov dh, bottom_row_num		; current cursor row
+	mov dl, first_stack_col		; current cursor column
+	jmp top_of_stack
 
 process_keyboard_input:
   xor ah, ah
@@ -130,94 +206,6 @@ move_command:
 
 ; ---------------------------------------------------------------------------
 
-print_card:
-  ; FIXME - show -- if the card is not shown
-
-  pusha
-
-  ; Fetch the card value
-  mov cl, byte [eax+1]
-  and cx, 000fh
-  push cx				; Save the current card value
-
-  ; Fetch the card family
-  mov cl, byte [eax+1]
-  shr cl, 6d
-  xor ch, ch
-
-  ; Set cursor position
-  mov ah, 02h		; Set cursor position
-  xor bh, bh		; Page number 0
-  mov bl, byte [family_colors+ecx]
-  int 10h
-
-  ; Display the card value...
-  pop ax				; Get the previously saved card value
-  mov al, byte [card_values+eax]
-  mov ah, 0eh		; Teletype output
-  int 10h
-
-  ; And the card family symbol...
-  mov al, byte [family_symbols+ecx]
-  mov ah, 0eh		; Teletype output
-  int 10h
-
-  popa
-  ret
-
-; ---------------------------------------------------------------------------
-
-print_stacks:
-	mov dh, top_row_num     	; Current cursor row
-	mov dl, first_stack_col 	; Current cursor column
-
-	xor cx, cx			; Current stack number; start at 0
-top_of_stack:
-	mov bl, byte [pile_pointers+ecx] ; Index of the current stack head
-show_stack_card:
-	and bx, 01111111b	; Filter out shown bit
-	cmp bl, end_of_pile
-	je nextstack
-
-	mov ax, first_card		; Card with the index
-	add ax, bx
-	call print_card
-
-	cmp cl, 7h
-	jl dumpstack_nextcard		; Only increment the cursor row if in bottom row
-	add dh,2d			; Increment cursor row only on bottom row
-
-dumpstack_nextcard:
-	mov bl, byte [eax]		; Update next card pointer
-	jmp show_stack_card
-
-nextstack:
-	cmp cl, 13d
-	je stackdone
-
-	inc cl
-
-	cmp cl, 7h			; What stack are we processing?
-	je next_stack_first_bottom_row	; Beginning of bottom row?
-	jl next_stack_top_row		; Still on the top row?
-					; Otherwise we are on the bottom row
-	add dl, stack_spacing		; Increment cursor column
-	mov dh, bottom_row_num		; Reset cursor row
-	jmp top_of_stack
-
-next_stack_top_row:
-	add dl, stack_spacing		; Increment cursor column
-	mov dh, top_row_num		; Reset cursor row
-	jmp top_of_stack
-
-next_stack_first_bottom_row:		; We are at the beginning of the
-					; first stack on the bottom row.
-	mov dh, bottom_row_num		; current cursor row
-	mov dl, first_stack_col		; current cursor column
-	jmp top_of_stack
-
-stackdone:
-	ret
 
   ; ---------------------------------------------------------------------------
 
