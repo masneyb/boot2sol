@@ -202,32 +202,24 @@ draw_command:
 ; - Source pile: n (see map above)
 ; - 4th from top
 ; - Destination pile: k (see map above)
-xor_int:
-	xor ah, ah
-	int 16h
-	ret
-xor_pile_edx:
-	xor ah, ah
-	mov al, byte [pile_pointers+edx]
-	ret
+
 move_command:
-	;; 	xor ah, ah			; Read keyboard input. The source pile (a-n)
-	;; int 16h
-	call xor_int
+	xor ah, ah			; Read keyboard input. The source pile (a-n)
+	int 16h
 	mov dl, al			; Store it in our counter
 	sub dl, 'a'			; Subtract ASCII 'a' to get index
 	xor dh, dh
 
-	;; xor ah, ah			; Read keyboard input. The number of cards to move.
-	;; int 16h
+	xor ah, ah			; Read keyboard input. The number of cards to move.
+	int 16h
 	mov cl, al			; Store it in our counter
 	sub cl, '0'			; Subtract ASCII '0' to get index
 
 	push dx				; Save the current source pile number since we need it
 					; if the pile becomes empty.
-	;; xor ah, ah
-	;; mov al, byte [pile_pointers+edx]; Source pile
-	call xor_pile_edx
+
+	xor ah, ah
+	mov al, byte [pile_pointers+edx]; Source pile
 	call find_bottom_of_pile
 
 	pop cx				; Fetch the current source pile number
@@ -243,9 +235,9 @@ move_command:
 
 .move_save_card:
 	push ax				; Save our card
-	;; xor ah, ah			; Read keyboard input. The destination pile (a-n)
-	;; int 16h
-	call xor_int
+
+	xor ah, ah			; Read keyboard input. The destination pile (a-n)
+	int 16h
 	mov dl, al			; Store it in our counter
 	sub dl, 'a'			; Subtract ASCII 'a' to get index
 	xor dh, dh
@@ -259,9 +251,8 @@ move_command:
 
 .move_dest_pile_has_cards:
 	mov cl, 0xff			; Select last card in list
-	;; xor ah, ah
-	;; mov al, byte [pile_pointers+edx]; Destination pile
-	call xor_pile_edx
+	xor ah, ah
+	mov al, byte [pile_pointers+edx]; Destination pile
 	call find_bottom_of_pile
 
 	pop bx				; Old ax; card moved from source pile
