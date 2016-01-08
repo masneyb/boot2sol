@@ -1,6 +1,6 @@
 ; http://www.nasm.us/doc/nasmdoc0.html
-; https://www.cs.uaf.edu/2006/fall/cs301/support/x86/
-; www.ctyme.com/intr/int-10.htm
+; http://www.ctyme.com/intr/int-10.htm
+; http://www.theasciicode.com.ar/
 
 %define top_row_num	5d
 %define bottom_row_num	9d
