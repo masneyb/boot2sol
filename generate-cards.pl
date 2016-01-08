@@ -58,7 +58,7 @@ print "first_card";
 my @pile_pointers;
 $pile_pointers[0] = "00000000";
 
-for (my $i = 0; $i < 23; $i++) {
+for (my $i = 0; $i < 5; $i++) {
 	my $val = pop @stack;
 
 	my $debug = '';
