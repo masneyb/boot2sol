@@ -12,7 +12,6 @@
 
 %define ok_message		'O'
 %define invalid_op_message	'!'
-%define draw_message 		'D'
 %define move_message		'M'
 
   BITS 16
@@ -74,20 +73,17 @@ draw_command:
   mov al, [pile_pointers]
 .loop:
   mov bx, [first_card+eax]
-  cmp bl, 0xFF
+  and bl, 01111111b
+  cmp bl, end_of_stack
   je .break
   mov cx, dx
   mov dx, bx
-  and bl, 01111111b
   mov al, bl
   jmp .loop
 .break:
-  and dl, 01111111b
   mov [pile_pointers+1], byte dl
   xor ch, ch
-  and cl, 01111111b
   mov [first_card+ecx], byte 0xFF
-  mov [status_message], byte draw_message
   jmp game_loop
 
 ; ---------------------------------------------------------------------------
