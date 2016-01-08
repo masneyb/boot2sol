@@ -275,12 +275,12 @@ move_command:
 	; - 0 1 spades
 	; - 0 0 clubs
 	; - First bit is the color (1=black, 0=red)
-	; Shown? - 1 bit
-	; Unused - 1 bit
+	; Unused - 2 bits
 	; Card - 4 bits
 	; - A=1, 2, 3-10, J=11, Q=12, K=13
 
-	; Pointer to next - 8 bits - 0xff - end of list
+	; Shown? - 1 bit
+	; Pointer to next - 7 bits - 0xff - end of list
 
 	first_card dw 10_0_0_1010_0_0000010b ; TD  - Top of deck stack - 0000000
 	dw 01_0_0_1100_0_0000100b ; QS  - 0000010
