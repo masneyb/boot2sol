@@ -205,11 +205,30 @@ draw_command:
 
 ; ---------------------------------------------------------------------------
 
-move_command:
-	mov cl, 2d   ; Select second card in the source pile
-	xor ah, ah
+; Pile indexes
+; a b _ d e f g
+; h i j k l m n
 
-	mov al, byte [pile_pointers+12]	; Source pile
+; Example keyboard input: mn4.
+; - move
+; - 14th pile (bottom right)
+; - 4th from top
+; Moves it to the bottom of pile 8 (currently hardcoded)
+
+move_command:
+	xor ah, ah			; Read keyboard input. The source pile (a-n)
+	int 16h
+	mov dl, al			; Store it in our counter
+	sub dl, 'a'			; Subtract ASCII 'a' to get index
+	xor dh, dh
+
+	xor ah, ah			; Read keyboard input. The number of cards to move.
+	int 16h
+	mov cl, al			; Store it in our counter
+	sub cl, '0'			; Subtract ASCII '0' to get index
+
+	xor ah, ah
+	mov al, byte [pile_pointers+edx]; Source pile
 	call find_bottom_of_pile
 
 	mov [first_card+edx], byte 0xff	; Set null byte on next to last entry
