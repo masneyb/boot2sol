@@ -29,7 +29,7 @@ solitaire within a bootloader. The goal is to boot a PC with a traditional BIOS
   * Brian S. used Fedora under Virtualbox
   * Ricky H. used Ubuntu under VMWare
 * NASM used for assembly
-* mkdosfs creating the boot floppy
+* mkdosfs used to create the boot floppy
 * QEMU for virtulizing the hardware
 
 
@@ -44,40 +44,39 @@ We included another pile, the space between the discard pile and the suit piles.
 This pile is never added to or drawn from, but its existence simplifies the
 implementation. So, boot2sol recognizes a total of 14 piles, zero indexed.
 
+The cards in each pile are represented as a linked list. 14 bytes of data are
+reserved for the head of each pile in the list.
+
 The representation of each card uses two bytes:
 
-Family | Unused | Card Value | Shown | Next
+Family | Unused | Card Value | Shown | Offset to next card
 -------|--------|------------|-------|-----
 2 bits | 2 bits | 4 bits     | 1 bit | 7 bits
 
-## Development Notes, for historical purposes
+The end of the linked list is represented with the value 0x1111111.
 
-### NOTES: 1/6/2016
 
-Will and I spent a little time trying to figure out what was going on with the
-execution of the program.
+## How to run the game
 
-We noticed we were never incrementing the pile number in the next_stack display
-column number in the next_stack function. Will is adding functionality to space
-columns out by four spaces in the next_stack function (add dh, 4).
+Under Linux, you should be able to run `make run` to have it compile the program
+and launch it in a VM using QEMU.
 
-Additionally, after making this change we noticed every third column appears
-to print out correctly. The intermediate columns print the correct number of
-cards (except column 8), but the values are incorrect.
+To run it on bare metal, run `make` to compile and `dd if=boot.bin of=/dev/sdX bs=512 count=1`,
+where sdX is the path to a thumb drive that you want to boot from. Beware: This will
+destroy any data you have on your thumb drive.
 
-We also noticed that instructions that should be equivalent don't appear to be.
-For example, in the next_stack function, change inc register to add regsiter, 1.
-The output from the program is different, but only for certain cards. Possibly
-because instruction are different sizes causing memory or alignment problems?
 
-No idea.
+## Keyboard commands
+* The `d` key advances the draw pile.
+* The `m` key is used to move one or more cards from one pile to another. It takes three additional keyboard commands:
+  * Source pile number (See table below)
+  * Source pile card number (from the top of the list). Allowed values: 1-9
+  * Destination pile number (See table below)
 
-### Ricky's Notes: 1/6/2016 - 20:38
-Found a spot where we were using a literal 52 instead of literal
-104. Also, there was an off-by-one error for the number of lower
-piles in a comparison. Fixed that as we well.
 
-With these modifications, the lower pile is almost all correct.
-However, there are a couple cards at the top of the pile that are
-pulled as "the space of clubs." Other than that, the rest of the
-pile appears correct!
+## Pile numbering
+
+a | b |   | d | e | f | g |
+h | i | j | k | l | m | n |
+
+
