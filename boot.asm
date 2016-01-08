@@ -27,6 +27,8 @@
   mov sp, 0x0ffff	; Grows downwards!
 
 game_loop:
+			; Set the video resolution. This also clears
+			; the screen.
   mov ax, 12h           ; high = 0, set video mode routine
   			; low = 12h = G  80x30  8x16  640x480   16/256K  .   A000 VGA,ATI VIP
   int 10h		; Call BIOS
