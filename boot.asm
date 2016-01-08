@@ -282,6 +282,7 @@ move_command:
 	; Shown? - 1 bit
 	; Pointer to next - 7 bits - 0xff - end of list
 
+	; FIXME - we are currently 7 cards short due to our program size exceeding 510 bytes
 	first_card dw 10_0_0_1010_0_0000010b ; TD  - Top of deck stack - 0000000
 	dw 01_0_0_1100_0_0000100b ; QS  - 0000010
 	dw 00_0_0_1100_0_0000110b ; QC  - 0000100
