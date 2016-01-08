@@ -254,7 +254,15 @@ move_command:
 	sub dl, 'a'			; Subtract ASCII 'a' to get index
 	xor dh, dh
 
-	mov cl, 0xff   ; Select last card in list
+	cmp [pile_pointers+edx], byte end_of_pile ; Is the destination pile already empty?
+	jne .move_dest_pile_has_cards
+
+	pop bx				; Old ax; card moved from source pile
+	mov [pile_pointers+edx], byte bl
+	jmp game_loop
+
+.move_dest_pile_has_cards:
+	mov cl, 0xff			; Select last card in list
 	xor ah, ah
 	mov al, byte [pile_pointers+edx]; Destination pile
 	call find_bottom_of_pile
