@@ -10,9 +10,6 @@
 
 %define end_of_pile	01111111b
 
-%define ok_message		' '
-%define invalid_op_message	'!'
-
 %define draw_down_pile_number   0
 %define draw_up_pile_number     1
 ;%define draw_down_pile_number	13
@@ -33,17 +30,6 @@ game_loop:
 	mov ax, 12h           ; high = 0, set video mode routine
 				; low = 12h = G  80x30  8x16  640x480   16/256K  .   A000 VGA,ATI VIP
 	int 10h		; Call BIOS
-
-	; Print status message. First set the cursor
-	xor dx, dx		; row 0, column 0
-	mov bx, 4d
-	mov ah, 02h		; set cursor position
-	int 10h
-
-	; Now show the message
-	mov al, [status_message]
-	mov ah, 0eh		; Teletype output
-	int 10h
 
 print_stacks:
 	mov dh, top_row_num     	; Current cursor row
@@ -136,7 +122,6 @@ process_keyboard_input:
 	cmp al, 'm'
 	je move_command
 
-	mov [status_message], byte invalid_op_message
 	jmp game_loop
 
 ; ---------------------------------------------------------------------------
@@ -345,8 +330,6 @@ move_command:
 	db 0100000b
 	db 0101010b
 	db 0110110b
-
-	status_message db ok_message
 
 ;	times 510-($-$$) db 0
 ;	dw 0AA55h  ; Boot signature
