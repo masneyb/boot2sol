@@ -10,10 +10,12 @@
 
 %define end_of_pile	01111111b
 
-%define ok_message		'O'
+%define ok_message		' '
 %define invalid_op_message	'!'
 %define move_message		'M'
 
+;%define draw_down_pile_number   0
+;%define draw_up_pile_number     1
 %define draw_down_pile_number	13
 %define draw_up_pile_number	7
 
