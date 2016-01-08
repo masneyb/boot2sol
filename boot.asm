@@ -205,31 +205,27 @@ draw_command:
 
 ; ---------------------------------------------------------------------------
 
-read_alpha_num:
-	xor ah, ah			; Read keyboard input
-	int 16h
-	sub al, 'a'			; Subtract ASCII 'a' to get index
-	ret
-
-; ---------------------------------------------------------------------------
-
 ; Pile indexes
 ; a b _ d e f g
 ; h i j k l m n
 
-; Example keyboard input: mndk
+; Example keyboard input: mn4k
 ; - move
 ; - Source pile: n (see map above)
 ; - 4th from top
 ; - Destination pile: k (see map above)
 
 move_command:
-	call read_alpha_num
+	xor ah, ah			; Read keyboard input. The source pile (a-n)
+	int 16h
 	mov dl, al			; Store it in our counter
+	sub dl, 'a'			; Subtract ASCII 'a' to get index
 	xor dh, dh
 
-	call read_alpha_num
+	xor ah, ah			; Read keyboard input. The number of cards to move.
+	int 16h
 	mov cl, al			; Store it in our counter
+	sub cl, '0'			; Subtract ASCII '0' to get index
 
 	xor ah, ah
 	mov al, byte [pile_pointers+edx]; Source pile
@@ -239,18 +235,20 @@ move_command:
 
 	push ax				; Save our card
 
-	call read_alpha_num
+	xor ah, ah			; Read keyboard input. The destination pile (a-n)
+	int 16h
 	mov dl, al			; Store it in our counter
+	sub dl, 'a'			; Subtract ASCII 'a' to get index
 	xor dh, dh
 
-	mov cl, 0xff   			; Select last card in list
+	mov cl, 0xff   ; Select last card in list
 	xor ah, ah
 	mov al, byte [pile_pointers+edx]; Destination pile
 	call find_bottom_of_pile
 
 	pop bx				; Old ax; card moved from source pile
 
-	mov [first_card+eax], byte bl	; Set the next pointer to the card that was moved
+	mov [first_card+eax], byte bl		; Set the next pointer to the card that was moved
 
 	jmp game_loop
 
