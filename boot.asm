@@ -80,7 +80,7 @@ find_bottom_of_pile:
 ; ---------------------------------------------------------------------------
 
 draw_command:
-  xor ax, ax
+  xor ah, ah
 
   cmp [pile_pointers+draw_down_pile_number], byte end_of_pile
   jne .draw_source_pile_has_cards
@@ -133,9 +133,15 @@ print_card:
 
   pusha
 
-  call fetch_card_value
+  ; Fetch the card value
+  mov cl, byte [eax+1]
+  and cx, 000fh
   push cx				; Save the current card value
-  call fetch_card_family
+
+  ; Fetch the card family
+  mov cl, byte [eax+1]
+  shr cl, 6d
+  xor ch, ch
 
   ; Set cursor position
   mov ah, 02h		; Set cursor position
@@ -159,31 +165,11 @@ print_card:
 
 ; ---------------------------------------------------------------------------
 
-fetch_card_value:
-  mov cl, byte [eax+1]
-  and cx, 000fh
-  ret
-
-fetch_card_family:
-  mov cl, byte [eax+1]
-  shr cl, 6d
-  xor ch, ch
-  ret
-
-;fetch_card_shown:
-;  mov cl, byte [eax]
-;  shl cl, 2d
-;  shr cl, 7d
-;  xor ch, ch
-;  ret
-
-; ---------------------------------------------------------------------------
-
 print_stacks:
 	mov dh, top_row_num     	; Current cursor row
 	mov dl, first_stack_col 	; Current cursor column
 
-	xor ecx, ecx			; Current stack number; start at 0
+	xor cx, cx			; Current stack number; start at 0
 top_of_stack:
 	mov bl, byte [pile_pointers+ecx] ; Index of the current stack head
 show_stack_card:
@@ -323,5 +309,5 @@ stackdone:
 
   status_message db ok_message
 
-  times 510-($-$$) db 0
-  dw 0AA55h  ; Boot signature
+;  times 510-($-$$) db 0
+;  dw 0AA55h  ; Boot signature
