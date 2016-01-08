@@ -88,6 +88,11 @@ by the following table:
  h | i | j | k | l | m | n
 
 
+## Example
+
+You can press `mn4k` to move the 4th card on pile n (bottom right) to the end of pile k.
+
+
 ## Limitations
 
 Due to the limited space available, the program currently does little to no validation and
