@@ -159,6 +159,8 @@ find_bottom_of_pile:
 
 ; ---------------------------------------------------------------------------
 
+; FIXME - bug when the open draw pile has no cards
+
 draw_command:
 	mov cl, 0xff		; Max out the counter for find_bottom_of_pile
 				; This will be sufficient for all of the cards
