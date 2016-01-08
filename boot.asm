@@ -14,6 +14,9 @@
 %define invalid_op_message	'!'
 %define move_message		'M'
 
+%define draw_down_pile_number	13
+%define draw_up_pile_number	7
+
   BITS 16
 
   mov ax, 0x07c0	; Where we're loaded
@@ -78,14 +81,14 @@ find_bottom_of_pile:
 ; and it does not handle putting the old card back in the deck
 draw_command:
   xor ax, ax
-  mov al, byte [pile_pointers+13]	; Source pile
+  mov al, byte [pile_pointers+draw_down_pile_number]	; Source pile
   call find_bottom_of_pile
 
   mov [first_card+edx], byte 0xff	; Set null byte on next to last entry
 
   push ax				; Save our card
 
-  mov al, byte [pile_pointers+7]	; Destination pile
+  mov al, byte [pile_pointers+draw_up_pile_number]	; Destination pile
   call find_bottom_of_pile
 
   pop bx				; Old ax; card moved from source pile
