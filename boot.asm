@@ -160,47 +160,47 @@ find_bottom_of_pile:
 ; ---------------------------------------------------------------------------
 
 draw_command:
-;	mov cl, 0xff		; Max out the counter for find_bottom_of_pile
-;				; This will be sufficient for all of the cards
-;				; that will be present.
-;	xor ah, ah
-;
-;	cmp [pile_pointers+draw_down_pile_number], byte end_of_pile
-;	jne .draw_source_pile_has_cards
-;
-;	; No cards left to pull. Swap the piles
-;	mov al, byte [pile_pointers+draw_up_pile_number]
-;	mov [pile_pointers+draw_down_pile_number], byte al
-;
-;	call find_bottom_of_pile
-;
-;	mov [first_card+edx], byte 0xff	; Set null byte on next to last entry
-;	mov [pile_pointers+draw_up_pile_number], byte al
-;	jmp game_loop
-;
-;.draw_source_pile_has_cards:
-;	mov al, byte [pile_pointers+draw_down_pile_number]	; Source pile
-;	call find_bottom_of_pile
-;
-;	cmp dl, end_of_pile
-;	je .draw_source_pile_empty
-;
-;	mov [first_card+edx], byte 0xff	; Set null byte on next to last entry
-;	jmp .save_card
-;
-;.draw_source_pile_empty:
-;	mov [pile_pointers+draw_down_pile_number], byte end_of_pile
-;
-;.save_card:
-;
-;	push ax				; Save our card
-;
-;	mov al, byte [pile_pointers+draw_up_pile_number]	; Destination pile
-;	call find_bottom_of_pile
-;
-;	pop bx				; Old ax; card moved from source pile
-;
-;	mov [first_card+eax], byte bl		; Set the next pointer to the card that was moved
+	mov cl, 0xff		; Max out the counter for find_bottom_of_pile
+				; This will be sufficient for all of the cards
+				; that will be present.
+	xor ah, ah
+
+	cmp [pile_pointers+draw_down_pile_number], byte end_of_pile
+	jne .draw_source_pile_has_cards
+
+	; No cards left to pull. Swap the piles
+	mov al, byte [pile_pointers+draw_up_pile_number]
+	mov [pile_pointers+draw_down_pile_number], byte al
+
+	call find_bottom_of_pile
+
+	mov [first_card+edx], byte 0xff	; Set null byte on next to last entry
+	mov [pile_pointers+draw_up_pile_number], byte al
+	jmp game_loop
+
+.draw_source_pile_has_cards:
+	mov al, byte [pile_pointers+draw_down_pile_number]	; Source pile
+	call find_bottom_of_pile
+
+	cmp dl, end_of_pile
+	je .draw_source_pile_empty
+
+	mov [first_card+edx], byte 0xff	; Set null byte on next to last entry
+	jmp .save_card
+
+.draw_source_pile_empty:
+	mov [pile_pointers+draw_down_pile_number], byte end_of_pile
+
+.save_card:
+
+	push ax				; Save our card
+
+	mov al, byte [pile_pointers+draw_up_pile_number]	; Destination pile
+	call find_bottom_of_pile
+
+	pop bx				; Old ax; card moved from source pile
+
+	mov [first_card+eax], byte bl		; Set the next pointer to the card that was moved
 	jmp game_loop
 
 ; ---------------------------------------------------------------------------
