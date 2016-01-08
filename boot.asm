@@ -209,11 +209,11 @@ draw_command:
 ; a b _ d e f g
 ; h i j k l m n
 
-; Example keyboard input: mn4.
+; Example keyboard input: mn4k
 ; - move
-; - 14th pile (bottom right)
+; - Source pile: n (see map above)
 ; - 4th from top
-; Moves it to the bottom of pile 8 (currently hardcoded)
+; - Destination pile: k (see map above)
 
 move_command:
 	xor ah, ah			; Read keyboard input. The source pile (a-n)
@@ -235,8 +235,15 @@ move_command:
 
 	push ax				; Save our card
 
+	xor ah, ah			; Read keyboard input. The destination pile (a-n)
+	int 16h
+	mov dl, al			; Store it in our counter
+	sub dl, 'a'			; Subtract ASCII 'a' to get index
+	xor dh, dh
+
 	mov cl, 0xff   ; Select last card in list
-	mov al, byte [pile_pointers+8]	; Destination pile
+	xor ah, ah
+	mov al, byte [pile_pointers+edx]; Destination pile
 	call find_bottom_of_pile
 
 	pop bx				; Old ax; card moved from source pile
