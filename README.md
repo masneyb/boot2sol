@@ -86,4 +86,7 @@ by the following table:
 
 ## Limitations
 
-TODO
+Due to the limited space available, the program currently does little to no validation and
+does not hide the cards that shouldn't be shown. We also needed 13 additional bytes so 7 cards
+were taken out of the deck.
+
