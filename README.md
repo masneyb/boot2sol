@@ -20,7 +20,7 @@ solitaire within a bootloader. The goal is to boot a PC with a traditional BIOS
 * Program code and data must fit on a single sector on disk
   * 512 bytes total
   * Last 2 bytes is the boot sector signature
-  * Only **510 bytes** total to initialize
+  * Only **510 bytes** total available for our data and code
 * System running in real mode; no memory production available
 * Limited tooling available for debugging issues
 * Requires detailed knowledge of x86 architecture
@@ -96,4 +96,9 @@ You can press `mn4k` to move the 4th card on pile n (bottom right) to the end of
 Due to the limited space available, the program currently does little to no validation and
 does not hide the cards that shouldn't be shown. We also needed 13 additional bytes so 7 cards
 were taken out of the deck.
+
+
+## Screenshot
+
+![boot2sol initial page](images/boot2sol-initial-startup.png "boot2sol initial page")
 
