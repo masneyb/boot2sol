@@ -5,9 +5,7 @@ Solitaire. Written inside the bootloader.
 ## Overview
 As part of Move Inc.'s Startup Hackathon, 2016, our team decided to write
 solitaire within a bootloader. The goal is to boot a PC with a traditional BIOS
-(no EFI) into an interactive game of solitaire.
-
-Introduction video:
+(no EFI) into an interactive game of solitaire. Introduction video:
 
 [![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/3hT80P14Tz8/0.jpg)](http://www.youtube.com/watch?v=3hT80P14Tz8)
 
