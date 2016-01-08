@@ -12,7 +12,6 @@
 
 %define ok_message		' '
 %define invalid_op_message	'!'
-%define move_message		'M'
 
 ;%define draw_down_pile_number   0
 ;%define draw_up_pile_number     1
@@ -145,6 +144,9 @@ process_keyboard_input:
 find_bottom_of_pile:
 	mov dx, end_of_pile
 .loop:
+	dec cl		; Check to see if the counter is zero yet
+	jz .break
+
 	mov bl, byte [first_card+eax]
 	and bx, 01111111b
 	cmp bl, end_of_pile
@@ -158,6 +160,9 @@ find_bottom_of_pile:
 ; ---------------------------------------------------------------------------
 
 draw_command:
+	mov cl, 0xff		; Max out the counter for find_bottom_of_pile
+				; This will be sufficient for all of the cards
+				; that will be present.
 	xor ah, ah
 
 	cmp [pile_pointers+draw_down_pile_number], byte end_of_pile
@@ -201,7 +206,24 @@ draw_command:
 ; ---------------------------------------------------------------------------
 
 move_command:
-	mov [status_message], byte move_message
+	mov cl, 2d   ; Select second card in the source pile
+	xor ah, ah
+
+	mov al, byte [pile_pointers+12]	; Source pile
+	call find_bottom_of_pile
+
+	mov [first_card+edx], byte 0xff	; Set null byte on next to last entry
+
+	push ax				; Save our card
+
+	mov cl, 0xff   ; Select last card in list
+	mov al, byte [pile_pointers+8]	; Destination pile
+	call find_bottom_of_pile
+
+	pop bx				; Old ax; card moved from source pile
+
+	mov [first_card+eax], byte bl		; Set the next pointer to the card that was moved
+
 	jmp game_loop
 
 ; ---------------------------------------------------------------------------
