@@ -245,7 +245,7 @@ move_command:
 .move_source_pile_now_empty:
         mov [pile_pointers+ecx], byte end_of_pile
 
-.move_save_card
+.move_save_card:
 	push ax				; Save our card
 
 	xor ah, ah			; Read keyboard input. The destination pile (a-n)
