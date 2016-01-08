@@ -10,10 +10,10 @@ solitaire within a bootloader. The goal is to boot a PC with a traditional BIOS
 [![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/3hT80P14Tz8/0.jpg)](http://www.youtube.com/watch?v=3hT80P14Tz8)
 
 ## Team Members
-* Brian Sizemore - [bpsizemore](https://github.com/bpsizemore)
 * Brian Masney - [masneyb](https://github.com/masneyb)
-* Will Austin - [dreae](https://github.com/dreae)
+* Brian Sizemore - [bpsizemore](https://github.com/bpsizemore)
 * Ricky Hussmann - [rhussmann](https://github.com/rhussmann)
+* Will Austin - [dreae](https://github.com/dreae)
 
 ## Technical Requirements
 * Must be written in 16-bit x86 assembly language
