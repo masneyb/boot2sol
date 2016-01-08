@@ -8,7 +8,7 @@
 %define stack_spacing	10d
 %define all_cards_len	104d
 
-%define end_of_stack	01111111b
+%define end_of_pile	01111111b
 
 %define ok_message		'O'
 %define invalid_op_message	'!'
@@ -65,12 +65,11 @@ process_keyboard_input:
 ; ---------------------------------------------------------------------------
 
 find_bottom_of_pile:
-  mov dx, end_of_stack
+  mov dx, end_of_pile
 .loop:
-  ; FIXME - handle end of pile offset in eax
   mov bl, byte [first_card+eax]
   and bx, 01111111b
-  cmp bl, end_of_stack
+  cmp bl, end_of_pile
   je .break
   mov dx, ax
   mov ax, bx
@@ -79,14 +78,37 @@ find_bottom_of_pile:
   ret
 
 ; ---------------------------------------------------------------------------
-; TODO: This does not yet handle drawing to the last card
-; and it does not handle putting the old card back in the deck
+
 draw_command:
   xor ax, ax
-  mov al, byte [pile_pointers+draw_down_pile_number]	; Source pile
+
+  cmp [pile_pointers+draw_down_pile_number], byte end_of_pile
+  jne .draw_source_pile_has_cards
+
+  ; No cards left to pull. Swap the piles
+  mov al, byte [pile_pointers+draw_up_pile_number]
+  mov [pile_pointers+draw_down_pile_number], byte al
+
   call find_bottom_of_pile
 
   mov [first_card+edx], byte 0xff	; Set null byte on next to last entry
+  mov [pile_pointers+draw_up_pile_number], byte al
+  jmp game_loop
+
+.draw_source_pile_has_cards:
+  mov al, byte [pile_pointers+draw_down_pile_number]	; Source pile
+  call find_bottom_of_pile
+
+  cmp dl, end_of_pile
+  je .draw_source_pile_empty
+
+  mov [first_card+edx], byte 0xff	; Set null byte on next to last entry
+  jmp .save_card
+
+.draw_source_pile_empty:
+  mov [pile_pointers+draw_down_pile_number], byte end_of_pile
+
+.save_card:
 
   push ax				; Save our card
 
@@ -166,7 +188,7 @@ top_of_stack:
 	mov bl, byte [pile_pointers+ecx] ; Index of the current stack head
 show_stack_card:
 	and bx, 01111111b	; Filter out shown bit
-	cmp bl, end_of_stack
+	cmp bl, end_of_pile
 	je nextstack
 
 	mov ax, first_card		; Card with the index
@@ -231,7 +253,7 @@ stackdone:
 
   ; Pointer to next - 8 bits - 0xff - end of list
 
-  first_card dw 11_0_0_1001_0_0000010b ; 9H  - Top of deck stack - 0000000
+  first_card dw 11_0_0_1001_0_0000010b ; 9H  - Top of deck pile - 0000000
   dw 10_0_0_0111_0_0000100b ; 7D  - 0000010
   dw 00_0_0_0110_0_0000110b ; 6C  - 0000100
   dw 01_0_0_0010_0_0001000b ; 2S  - 0000110
@@ -255,28 +277,28 @@ stackdone:
   dw 11_0_0_1000_0_0101100b ; 8H  - 0101010
   dw 01_0_0_1001_1_1111111b ; 9S+ - 0101100
   dw 01_0_0_0101_1_1111111b ; 5S+ - Drawn card - 0101110
-  dw 00_0_0_0011_1_1111111b ; 3C+ - Beginning of stack 7 - 0110000
-  dw 00_0_0_1000_0_0110100b ; 8C  - Beginning of stack 8 - 0110010
+  dw 00_0_0_0011_1_1111111b ; 3C+ - Beginning of pile 7 - 0110000
+  dw 00_0_0_1000_0_0110100b ; 8C  - Beginning of pile 8 - 0110010
   dw 00_0_0_1010_1_1111111b ; TC+ - 0110100
-  dw 11_0_0_1101_0_0111000b ; KH  - Beginning of stack 9 - 0110110
+  dw 11_0_0_1101_0_0111000b ; KH  - Beginning of pile 9 - 0110110
   dw 00_0_0_1100_0_0111010b ; QC  - 0111000
   dw 00_0_0_1001_1_1111111b ; 9C+ - 0111010
-  dw 11_0_0_0110_0_0111110b ; 6H  - Beginning of stack 10 - 0111100
+  dw 11_0_0_0110_0_0111110b ; 6H  - Beginning of pile 10 - 0111100
   dw 10_0_0_1011_0_1000000b ; JD  - 0111110
   dw 10_0_0_0100_0_1000010b ; 4D  - 1000000
   dw 11_0_0_0101_1_1111111b ; 5H+ - 1000010
-  dw 11_0_0_1010_0_1000110b ; TH  - Beginning of stack 11 - 1000100
+  dw 11_0_0_1010_0_1000110b ; TH  - Beginning of pile 11 - 1000100
   dw 01_0_0_0011_0_1001000b ; 3S  - 1000110
   dw 11_0_0_0011_0_1001010b ; 3H  - 1001000
   dw 00_0_0_0101_0_1001100b ; 5C  - 1001010
   dw 01_0_0_1100_1_1111111b ; QS+ - 1001100
-  dw 01_0_0_0100_0_1010000b ; 4S  - Beginning of stack 12 - 1001110
+  dw 01_0_0_0100_0_1010000b ; 4S  - Beginning of pile 12 - 1001110
   dw 01_0_0_0111_0_1010010b ; 7S  - 1010000
   dw 10_0_0_0101_0_1010100b ; 5D  - 1010010
   dw 01_0_0_1101_0_1010110b ; KS  - 1010100
   dw 01_0_0_1011_0_1011000b ; JS  - 1010110
   dw 11_0_0_0100_1_1111111b ; 4H+ - 1011000
-  dw 10_0_0_1000_0_1011100b ; 8D  - Beginning of stack 13 - 1011010
+  dw 10_0_0_1000_0_1011100b ; 8D  - Beginning of pile 13 - 1011010
   dw 01_0_0_0110_0_1011110b ; 6S  - 1011100
   dw 00_0_0_0001_0_1100000b ; AC  - 1011110
   dw 11_0_0_0001_0_1100010b ; AH  - 1100000
