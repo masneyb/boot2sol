@@ -214,6 +214,7 @@ stackdone:
   family_colors db 7d, 7d, 4d, 4d
   family_symbols db 'CSDH'
   ;family_symbols db 0x06d,0x05d,0x04d,0x03d
+  ;FIXME - why can't we show the symbols instaed?
 
   ; Family - 2 bits
   ; - 1 1 hearts
