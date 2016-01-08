@@ -23,16 +23,10 @@
   mov ss, ax
   mov sp, 0x0ffff	; Grows downwards!
 
+game_loop:
   mov ax, 12h           ; high = 0, set video mode routine
   			; low = 12h = G  80x30  8x16  640x480   16/256K  .   A000 VGA,ATI VIP
   int 10h		; Call BIOS
-
-game_loop:
-  mov cl, 0
-  mov dl, 0xFF
-  mov ax, 0600h		; Clear the screen
-  xor bx, bx
-  int 10h
 
   ; Print status message. First set the cursor
   xor dx, dx		; row 0, column 0
@@ -64,26 +58,39 @@ process_keyboard_input:
   jmp game_loop
 
 ; ---------------------------------------------------------------------------
+
+find_bottom_of_pile:
+  mov dx, end_of_stack
+.loop:
+  ; FIXME - handle end of pile offset in eax
+  mov bl, byte [first_card+eax]
+  and bx, 01111111b
+  cmp bl, end_of_stack
+  je .break
+  mov dx, ax
+  mov ax, bx
+  jmp .loop
+.break:
+  ret
+
+; ---------------------------------------------------------------------------
 ; TODO: This does not yet handle drawing to the last card
 ; and it does not handle putting the old card back in the deck
 draw_command:
-  xor cx, cx
   xor ax, ax
-  xor dx, dx
-  mov al, [pile_pointers]
-.loop:
-  mov bx, [first_card+eax]
-  and bl, 01111111b
-  cmp bl, end_of_stack
-  je .break
-  mov cx, dx
-  mov dx, bx
-  mov al, bl
-  jmp .loop
-.break:
-  mov [pile_pointers+1], byte dl
-  xor ch, ch
-  mov [first_card+ecx], byte 0xFF
+  mov al, byte [pile_pointers+13]	; Source pile
+  call find_bottom_of_pile
+
+  mov [first_card+edx], byte 0xff	; Set null byte on next to last entry
+
+  push ax				; Save our card
+
+  mov al, byte [pile_pointers+7]	; Destination pile
+  call find_bottom_of_pile
+
+  pop bx				; Old ax; card moved from source pile
+
+  mov [first_card+eax], byte bl		; Set the next pointer to the card that was moved
   jmp game_loop
 
 ; ---------------------------------------------------------------------------
@@ -203,6 +210,7 @@ stackdone:
   card_values db ' A23456789TJQK'
   family_colors db 7d, 7d, 4d, 4d
   family_symbols db 'CSDH'
+  ;family_symbols db 0x06d,0x05d,0x04d,0x03d
 
   ; Family - 2 bits
   ; - 1 1 hearts
