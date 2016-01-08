@@ -76,6 +76,9 @@ destroy any data you have on your thumb drive.
 
 ## Pile numbering
 
+The move command takes a source and destination pile number that is represented
+by the following table:
+
 a | b |   | d | e | f | g
 --|---|---|---|---|---|---
 h | i | j | k | l | m | n
