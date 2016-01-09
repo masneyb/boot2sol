@@ -226,34 +226,36 @@ draw_command:
 
 ; ---------------------------------------------------------------------------
 
+read_keyboard_input:
+	xor ax, ax			; Read keyboard input
+	int 16h
+	sub al, 'a'			; Subtract ASCII 'a' to get index
+	ret
+
+; ---------------------------------------------------------------------------
+
 ; Pile indexes
 ; a b _ d e f g
 ; h i j k l m n
 
-; Example keyboard input: mn4k
+; Example keyboard input: mndk
 ; - move
 ; - Source pile: n (see map above)
 ; - 4th from top
 ; - Destination pile: k (see map above)
 
 move_command:
-	xor ah, ah			; Read keyboard input. The source pile (a-n)
-	int 16h
-	sub al, 'a'			; Subtract ASCII 'a' to get index
-
+	call read_keyboard_input
 	xor dh, dh
 	mov dl, al			; Input for perform_move_command: source pile number
 
-	xor ah, ah			; Read keyboard input. The number of cards to move.
-	int 16h
+	call read_keyboard_input
 	mov cl, al			; Input for perform_move_command: card number in pile
-	sub cl, '0'			; Subtract ASCII '0' to get index
+	inc cl				; This counter is zero based
 
-	xor ah, ah			; Read keyboard input. The source pile (a-n)
-	int 16h
-	mov bl, al			; Input for perform_move_command: source pile number
-	sub bl, 'a'			; Subtract ASCII 'a' to get index
+	call read_keyboard_input
 	xor bh, bh
+	mov bl, al			; Input for perform_move_command: source pile number
 
 	call perform_move_command
 

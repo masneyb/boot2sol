@@ -75,7 +75,7 @@ The end of the linked list in the next pointer is represented with the value
 * The `d` key advances the draw pile.
 * The `m` key is used to move one or more cards from one pile to another. It takes three additional keyboard commands:
   * Source pile number (See table below)
-  * Source pile card number (from the top of the list). Allowed values: 1-9
+  * Source pile card number (from the top of the list). Allowed values: a-z. (a=1, b=2, etc.) (Tip: use z to select the last card in the pile.)
   * Destination pile number (See table below)
 
 
@@ -91,7 +91,7 @@ by the following table:
 
 ## Example
 
-You can press `mn4k` to move the 4th card on pile n (bottom right) to the end of pile k.
+You can press `mndk` to move the 4th card on pile n (bottom right) to the end of pile k.
 
 
 ## Limitations
