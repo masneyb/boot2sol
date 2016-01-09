@@ -66,8 +66,8 @@ print_hidden_card:
 	mov bl, byte 7d
 	int 10h
 
-	mov al, byte '-'
-	mov ah, 0eh		; Teletype output
+	mov ax, 0e2dh	; High byte - 0eh - teletype output
+			; Low byte - 2dh - '-'
 	int 10h
 	int 10h
 
@@ -92,7 +92,7 @@ print_shown_card:
 
 	; Display the card value...
 	pop ax				; Get the previously saved card value
-	mov al, byte [card_values+eax]
+	mov al, byte [card_values+eax-1]
 	mov ah, 0eh		; Teletype output
 	int 10h
 
@@ -282,7 +282,7 @@ move_command:
 
 ; ---------------------------------------------------------------------------
 
-	card_values db ' A23456789TJQK'
+	card_values db 'A23456789TJQK'
 	family_colors db 7d, 7d, 4d, 4d
 	family_symbols db 'CSDH'
 
