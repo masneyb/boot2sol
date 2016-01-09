@@ -3,6 +3,8 @@
 ; http://www.ctyme.com/intr/int-10.htm
 ; http://www.theasciicode.com.ar/
 
+%define top_row_first_col_num 0505h
+
 %define top_row_num	5d
 %define bottom_row_num	9d
 %define first_stack_col 5d
@@ -40,8 +42,7 @@ game_loop:
 ;   in the pile is shown.
 
 print_stacks:
-	mov dh, top_row_num     	; Current cursor row
-	mov dl, first_stack_col 	; Current cursor column
+	mov dx, top_row_first_col_num	; Current cursor row / column. 
 
 	xor cx, cx			; Current stack number; start at 0
 top_of_stack:
