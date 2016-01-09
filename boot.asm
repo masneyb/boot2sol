@@ -3,13 +3,14 @@
 ; http://www.ctyme.com/intr/int-10.htm
 ; http://www.theasciicode.com.ar/
 
-%define top_row_first_col_num 0505h
-
 %define top_row_num	5d
 %define bottom_row_num	9d
 %define first_stack_col 5d
 %define stack_spacing	10d
 %define all_cards_len	104d
+%define top_row_first_col_num 0505h		; This is here as an optimization
+						; to reduce the binary size by a byte.
+						; (Yes, space is that tight.)
 
 %define end_of_pile		01111111b
 %define pile_next_ptr_mask	end_of_pile
@@ -245,6 +246,9 @@ draw_command:
 					; number of the cards present.
 	mov bx, draw_up_pile_number	; Input for perform_move_command: destination pile number
 	call perform_move_command
+
+	; FIXME - toggle the shown flags. Most likely integrate into perform_move_command.
+
 	jmp game_loop
 
 ; ---------------------------------------------------------------------------
