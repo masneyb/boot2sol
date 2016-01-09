@@ -97,7 +97,14 @@ You can press `mndk` to move the 4th card on pile n (bottom right) to the end of
 ## Limitations
 
 Due to the limited space available, the program currently does little to no validation and
-does not hide the cards that shouldn't be shown.
+does not hide the cards that shouldn't be shown. We also needed 13 additional bytes to
+finish the draw card and move card functionality so 7 cards were taken out of the deck
+to keep our program within the 510 byte restriction.
+
+During development, our program size went over the 510 byte ceiling several times. We would
+have to go back and look for ways to optimize the assembly code to reduce the overall size
+of the binary. On Thursday afternoon of the Hackathon (2016-01-07), we had a 108 byte
+reduction in the overall binary size and was able to keep the same feature set.
 
 ## Screenshot
 
