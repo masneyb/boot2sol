@@ -19,7 +19,7 @@ solitaire within a bootloader. The goal is to boot a PC with a traditional BIOS
 * Must be written in 16-bit x86 assembly language
 * Program code and data must fit on a single sector on disk
   * 512 bytes total
-  * Last 2 bytes is the boot sector signature
+  * Last 2 bytes is the boot sector signature (AA55h)
   * Only **510 bytes** total available for our data and code
 * System running in real mode; no memory production available
 * Limited tooling available for debugging issues
