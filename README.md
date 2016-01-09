@@ -32,7 +32,7 @@ solitaire within a bootloader. The goal is to boot a PC with a traditional BIOS
   * Ricky H. used Ubuntu under VMWare
 * NASM used for assembly
 * mkdosfs used to create the boot floppy
-* QEMU for virtulizing the hardware
+* QEMU for virtualizing the hardware
 
 
 ## Design
@@ -55,7 +55,8 @@ Family | Unused | Card Value | Shown | Offset to next card
 -------|--------|------------|-------|-----
 2 bits | 2 bits | 4 bits     | 1 bit | 7 bits
 
-The end of the linked list is represented with the value 0x1111111.
+The end of the linked list in the next pointer is represented with the value
+0x1111111.
 
 
 ## How to run the game
@@ -94,9 +95,14 @@ You can press `mn4k` to move the 4th card on pile n (bottom right) to the end of
 ## Limitations
 
 Due to the limited space available, the program currently does little to no validation and
-does not hide the cards that shouldn't be shown. We also needed 13 additional bytes so 7 cards
-were taken out of the deck.
+does not hide the cards that shouldn't be shown. We also needed 13 additional bytes to
+finish the draw card and move card functionality so 7 cards were taken out of the deck
+to keep our program within the 510 byte restriction.
 
+During development, our program size went over the 510 byte ceiling several times. We would
+have to go back and look for ways to optimize the assembly code to reduce the overall size
+of the binary. On Thursday afternoon of the Hackathon (2016-01-07), we had a 108 byte
+reduction in the overall binary size and was able to keep the same feature set.
 
 ## Screenshot
 
