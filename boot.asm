@@ -71,6 +71,8 @@ print_hidden_card:
 	mov ax, 0e2dh	; High byte - 0eh - teletype output
 			; Low byte - 2dh - '-'
 	int 10h
+	int 10h		; Show a second -. This can be removed
+			; to save an additional 2 bytes in the binary.
 
 	jmp finished_printing
 
@@ -232,7 +234,8 @@ draw_command:
 	mov bl, byte [pile_pointers+draw_down_pile_number]
 	mov [pile_pointers+draw_up_pile_number], byte bl
 	mov [pile_pointers+draw_down_pile_number], byte al
-	jmp game_loop
+
+	; Once the piles have been swapped, let it draw one card off...
 
 .draw_source_pile_has_cards:
 	mov dx, draw_down_pile_number	; Input for perform_move_command: source pile number
