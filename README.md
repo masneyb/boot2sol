@@ -61,12 +61,14 @@ The end of the linked list in the next pointer is represented with the value
 
 ## How to run the game
 
-Under Linux, you should be able to run `make run` to have it compile the program
-and launch it in a VM using QEMU.
-
-To run it on bare metal, run `make` to compile and `dd if=boot.bin of=/dev/sdX bs=512 count=1`,
-where sdX is the path to a thumb drive that you want to boot from. Beware: This will
-destroy any data you have on your thumb drive.
+* Fedora Linux users should only need to run `sudo dnf install qemu-system-x86 nasm`
+  to fetch the necessary dependencies.
+* Debian/Ubuntu Linux users should only need to run `sudo apt-get install qemu-system-x86 nasm`
+  to fetch the necessary dependencies.
+* `make run` to compile the program and launch it in a VM on your local machine using QEMU.
+* To run it on bare metal, run `make` to compile and `dd if=boot.bin of=/dev/sdX bs=512 count=1`,
+  where sdX is the path to a thumb drive that you want to boot from. Beware: This will
+  destroy any data you have on your thumb drive.
 
 
 ## Keyboard commands
