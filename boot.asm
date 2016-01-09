@@ -364,5 +364,5 @@ move_command:
 	db 1000000b
 	db 1001100b
 
-	;times 510-($-$$) db 0
-	;dw 0AA55h  ; Boot signature
+	times 510-($-$$) db 0
+	dw 0AA55h  ; Boot signature
