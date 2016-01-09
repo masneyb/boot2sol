@@ -5,8 +5,8 @@ Solitaire. Written inside the bootloader.
 ## Overview
 As part of Move Inc.'s Startup Hackathon, 2016, our team decided to write
 solitaire within the first stage bootloader. The goal is to boot an x86
-PC with a traditional BIOS (no UEFI) into an interactive game of solitaire.
-Introduction video:
+PC with a traditional BIOS (no UEFI) into an interactive game of solitaire
+without an operating system. Introduction video:
 
 [![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/3hT80P14Tz8/0.jpg)](http://www.youtube.com/watch?v=3hT80P14Tz8)
 
@@ -93,7 +93,8 @@ For example: You can press `mnzk` to move the last card on pile n (bottom right)
 The compiled binary is currently at 509 bytes, with only one extra usable byte
 remaining. Additional features and validations will require optimizing the assembly
 code even more to save a few bytes here and there. One possible change to free up a
-sizable chunk of space is to simplify the card data structure from 2 bytes to 1 byte:
+sizable chunk of space is to simplify the card data structure from 2 bytes to 1 byte
+using this layout:
 
 Shown | Unused | Offset to next card
 ------|--------|--------------------
