@@ -94,10 +94,23 @@ by the following table:
 You can press `mndk` to move the 4th card on pile n (bottom right) to the end of pile k.
 
 
-## Limitations
+## Space limitations
 
-Due to the limited space available, the program currently does little to no validation and
-does not hide the cards that shouldn't be shown.
+This program is currently at its maximum allowable size of 510 bytes. Additional
+features and validations will require optimizing the assembly code even more to
+save a few bytes here and there. One possible change to free up a sizable chunk
+of space is to simplify the card data structure from 2 bytes to 1 byte:
+
+Shown | Unused | Offset to next card
+------|--------|--------------------
+1 bit | 2 bits | 6 bits
+
+The cards would need to be stored in memory grouped by card family. Inside each
+family, the cards would be ordered ace through king. The pointer offset would
+be used to calculate the card value and face. Pseudocode: `offset / 13 = family`
+and `offset mod 13 = card value (ace-king)`. See the family_symbols symbol in the
+source code for the card family ordering.
+
 
 ## Screenshot
 
