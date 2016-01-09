@@ -42,7 +42,8 @@ game_loop:
 ;   in the pile is shown.
 
 print_stacks:
-	mov dx, top_row_first_col_num	; Current cursor row / column. 
+	mov dx, top_row_first_col_num	; Current cursor row / column. Combined into a
+					; single call to save 1 byte.
 
 	xor cx, cx			; Current stack number; start at 0
 top_of_stack:
@@ -69,7 +70,6 @@ print_hidden_card:
 
 	mov ax, 0e2dh	; High byte - 0eh - teletype output
 			; Low byte - 2dh - '-'
-	int 10h
 	int 10h
 
 	jmp finished_printing
