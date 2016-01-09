@@ -4,8 +4,9 @@ Solitaire. Written inside the bootloader.
 
 ## Overview
 As part of Move Inc.'s Startup Hackathon, 2016, our team decided to write
-solitaire within a bootloader. The goal is to boot a PC with a traditional BIOS
-(no EFI) into an interactive game of solitaire. Introduction video:
+solitaire within the first stage bootloader. The goal is to boot an x86
+PC with a traditional BIOS (no UEFI) into an interactive game of solitaire.
+Introduction video:
 
 [![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/3hT80P14Tz8/0.jpg)](http://www.youtube.com/watch?v=3hT80P14Tz8)
 
@@ -47,25 +48,24 @@ This pile is never added to or drawn from, but its existence simplifies the
 implementation. So, boot2sol recognizes a total of 14 piles, zero indexed.
 
 The cards in each pile are represented as a linked list. 14 bytes of data are
-reserved for the head of each pile in the list.
-
-The representation of each card uses two bytes:
+reserved for the head of each pile in the list. The representation of each
+card uses two bytes:
 
 Family | Unused | Card Value | Shown | Offset to next card
 -------|--------|------------|-------|-----
 2 bits | 2 bits | 4 bits     | 1 bit | 7 bits
 
 The end of the linked list in the next pointer is represented with the value
-0x1111111.
+0x1111111 (7 ones).
 
 
 ## How to run the game
 
 * Fedora Linux users should only need to run `sudo dnf install qemu-system-x86 nasm`
   to fetch the necessary dependencies.
-* Debian/Ubuntu Linux users should only need to run `sudo apt-get install qemu-system-x86 nasm`
+* Debian-based systems should only need to run `sudo apt-get install qemu-system-x86 nasm`
   to fetch the necessary dependencies.
-* `make run` to compile the program and launch it in a VM on your local machine using QEMU.
+* `make run` compiles the program and launches it in a VM on your local machine using QEMU.
 * To run it on bare metal, run `make` to compile and `dd if=boot.bin of=/dev/sdX bs=512 count=1`,
   where sdX is the path to a thumb drive that you want to boot from. Beware: This will
   destroy any data you have on your thumb drive.
@@ -75,35 +75,29 @@ The end of the linked list in the next pointer is represented with the value
 * The `d` key advances the draw pile.
 * The `m` key is used to move one or more cards from one pile to another. It takes three additional keyboard commands:
   * Source pile number (See table below)
-  * Source pile card number (from the top of the list). Allowed values: a-z. (a=1, b=2, etc.) (Tip: use z to select the last card in the pile.)
+  * Source pile card index (from the top of the list). Allowed values: a-z, for the 1st through 26th card. The code won't advance past the end of the end of the pile so you can always use z to select the last card pile in the pile.
   * Destination pile number (See table below)
 
-
-## Pile numbering
-
-The move command takes a source and destination pile number that is represented
+The source and destination pile number for the move command is represented
 by the following table:
 
  a | b |   | d | e | f | g
 ---|---|---|---|---|---|---
  h | i | j | k | l | m | n
 
-
-## Example
-
-You can press `mndk` to move the 4th card on pile n (bottom right) to the end of pile k.
+For example: You can press `mnzk` to move the last card on pile n (bottom right) to the end of pile k.
 
 
 ## Space limitations
 
-This program is currently at its maximum allowable size of 510 bytes. Additional
-features and validations will require optimizing the assembly code even more to
-save a few bytes here and there. One possible change to free up a sizable chunk
-of space is to simplify the card data structure from 2 bytes to 1 byte:
+The compiled binary is currently at 509 bytes, with only one extra usable byte
+remaining. Additional features and validations will require optimizing the assembly
+code even more to save a few bytes here and there. One possible change to free up a
+sizable chunk of space is to simplify the card data structure from 2 bytes to 1 byte:
 
 Shown | Unused | Offset to next card
 ------|--------|--------------------
-1 bit | 2 bits | 6 bits
+1 bit | 1 bit  | 6 bits
 
 The cards would need to be stored in memory grouped by card family. Inside each
 family, the cards would be ordered ace through king. The pointer offset would
