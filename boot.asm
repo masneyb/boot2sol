@@ -51,12 +51,11 @@ show_stack_card:
 	cmp bl, end_of_pile		; At end of pile?
 	je nextstack
 
-	mov ax, first_card		; Card with the index
-	add ax, bx
+	mov ax, [first_card+ebx]	; Current card
 
 	pusha
 
-	mov cl, byte [eax]
+	mov cl, al
 	bt cx, 7
 	jc print_shown_card
 
@@ -76,12 +75,12 @@ print_hidden_card:
 
 print_shown_card:
 	; Fetch the card value
-	mov cl, byte [eax+1]
+	mov cl, ah
 	and cx, 000fh
 	push cx				; Save the current card value
 
 	; Fetch the card family
-	mov cl, byte [eax+1]
+	mov cl, ah
 	shr cl, 6d
 	xor ch, ch
 
@@ -110,7 +109,7 @@ finished_printing:
 	add dh,2d			; Increment cursor row only on bottom row
 
 dumpstack_nextcard:
-	mov bl, byte [eax]		; Update next card pointer
+	mov bl, al			; Update next card pointer
 	jmp show_stack_card
 
 nextstack:
