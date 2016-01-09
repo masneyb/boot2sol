@@ -133,6 +133,58 @@ process_keyboard_input:
 
 ; ---------------------------------------------------------------------------
 
+; inputs:
+; - dx - the source pile number
+; - cx - the card number within the pile on the source
+; - bx - the destination pile
+
+perform_move_command:
+	push bx				; Save the destination pile nmber
+
+	push dx				; Save the current source pile number since we need it
+					; if the pile becomes empty.
+
+	; Note: find_bottom_of_pile uses the cl register to find the desired card
+	xor ah, ah
+	mov al, byte [pile_pointers+edx]; Source pile
+	call find_bottom_of_pile
+
+	pop cx				; Fetch the current source pile number
+
+        cmp dl, end_of_pile
+        je .move_source_pile_now_empty
+
+	mov [first_card+edx], byte 0xff	; Set null byte on next to last entry
+	jmp .move_save_card
+
+.move_source_pile_now_empty:
+        mov [pile_pointers+ecx], byte end_of_pile
+
+.move_save_card:
+	pop dx				; Fetch the destination pile number
+
+	push ax				; Save our card
+
+	cmp [pile_pointers+edx], byte end_of_pile ; Is the destination pile already empty?
+	jne .move_dest_pile_has_cards
+
+	pop bx				; Old ax; card moved from source pile
+	mov [pile_pointers+edx], byte bl
+	ret
+
+.move_dest_pile_has_cards:
+	mov cl, 0xff			; Select last card in list
+	xor ah, ah
+	mov al, byte [pile_pointers+edx]; Destination pile
+	call find_bottom_of_pile
+
+	pop bx				; Old ax; card moved from source pile
+
+	mov [first_card+eax], byte bl		; Set the next pointer to the card that was moved
+	ret
+
+; ---------------------------------------------------------------------------
+
 find_bottom_of_pile:
 	mov dx, end_of_pile
 .loop:
@@ -151,50 +203,25 @@ find_bottom_of_pile:
 
 ; ---------------------------------------------------------------------------
 
-; FIXME - bug when the open draw pile has no cards
-
 draw_command:
-	mov cl, 0xff		; Max out the counter for find_bottom_of_pile
-				; This will be sufficient for all of the cards
-				; that will be present.
-	xor ah, ah
-
 	cmp [pile_pointers+draw_down_pile_number], byte end_of_pile
 	jne .draw_source_pile_has_cards
 
 	; No cards left to pull. Swap the piles
 	mov al, byte [pile_pointers+draw_up_pile_number]
+	mov bl, byte [pile_pointers+draw_down_pile_number]
+	mov [pile_pointers+draw_up_pile_number], byte bl
 	mov [pile_pointers+draw_down_pile_number], byte al
-
-	call find_bottom_of_pile
-
-	mov [first_card+edx], byte 0xff	; Set null byte on next to last entry
-	mov [pile_pointers+draw_up_pile_number], byte al
 	jmp game_loop
 
 .draw_source_pile_has_cards:
-	mov al, byte [pile_pointers+draw_down_pile_number]	; Source pile
-	call find_bottom_of_pile
-
-	cmp dl, end_of_pile
-	je .draw_source_pile_empty
-
-	mov [first_card+edx], byte 0xff	; Set null byte on next to last entry
-	jmp .save_card
-
-.draw_source_pile_empty:
-	mov [pile_pointers+draw_down_pile_number], byte end_of_pile
-
-.save_card:
-
-	push ax				; Save our card
-
-	mov al, byte [pile_pointers+draw_up_pile_number]	; Destination pile
-	call find_bottom_of_pile
-
-	pop bx				; Old ax; card moved from source pile
-
-	mov [first_card+eax], byte bl		; Set the next pointer to the card that was moved
+	mov dx, draw_down_pile_number	; Input for perform_move_command: source pile number
+	mov cl, 0xff			; Card number within the source pile. Max out the
+					; counter for find_bottom_of_pile so that we get
+					; the last card. This will be sufficient for the
+					; number of the cards present.
+	mov bx, draw_up_pile_number	; Input for perform_move_command: destination pile number
+	call perform_move_command
 	jmp game_loop
 
 ; ---------------------------------------------------------------------------
@@ -212,58 +239,23 @@ draw_command:
 move_command:
 	xor ah, ah			; Read keyboard input. The source pile (a-n)
 	int 16h
-	mov dl, al			; Store it in our counter
-	sub dl, 'a'			; Subtract ASCII 'a' to get index
+	sub al, 'a'			; Subtract ASCII 'a' to get index
+
 	xor dh, dh
+	mov dl, al			; Input for perform_move_command: source pile number
 
 	xor ah, ah			; Read keyboard input. The number of cards to move.
 	int 16h
-	mov cl, al			; Store it in our counter
+	mov cl, al			; Input for perform_move_command: card number in pile
 	sub cl, '0'			; Subtract ASCII '0' to get index
 
-	push dx				; Save the current source pile number since we need it
-					; if the pile becomes empty.
-
-	xor ah, ah
-	mov al, byte [pile_pointers+edx]; Source pile
-	call find_bottom_of_pile
-
-	pop cx				; Fetch the current source pile number
-
-        cmp dl, end_of_pile
-        je .move_source_pile_now_empty
-
-	mov [first_card+edx], byte 0xff	; Set null byte on next to last entry
-	jmp .move_save_card
-
-.move_source_pile_now_empty:
-        mov [pile_pointers+ecx], byte end_of_pile
-
-.move_save_card:
-	push ax				; Save our card
-
-	xor ah, ah			; Read keyboard input. The destination pile (a-n)
+	xor ah, ah			; Read keyboard input. The source pile (a-n)
 	int 16h
-	mov dl, al			; Store it in our counter
-	sub dl, 'a'			; Subtract ASCII 'a' to get index
-	xor dh, dh
+	mov bl, al			; Input for perform_move_command: source pile number
+	sub bl, 'a'			; Subtract ASCII 'a' to get index
+	xor bh, bh
 
-	cmp [pile_pointers+edx], byte end_of_pile ; Is the destination pile already empty?
-	jne .move_dest_pile_has_cards
-
-	pop bx				; Old ax; card moved from source pile
-	mov [pile_pointers+edx], byte bl
-	jmp game_loop
-
-.move_dest_pile_has_cards:
-	mov cl, 0xff			; Select last card in list
-	xor ah, ah
-	mov al, byte [pile_pointers+edx]; Destination pile
-	call find_bottom_of_pile
-
-	pop bx				; Old ax; card moved from source pile
-
-	mov [first_card+eax], byte bl		; Set the next pointer to the card that was moved
+	call perform_move_command
 
 	jmp game_loop
 
@@ -350,5 +342,5 @@ move_command:
 	db 1000000b
 	db 1001100b
 
-	times 510-($-$$) db 0
-	dw 0AA55h  ; Boot signature
+	;times 510-($-$$) db 0
+	;dw 0AA55h  ; Boot signature
