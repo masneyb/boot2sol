@@ -1,3 +1,4 @@
+; http://faydoc.tripod.com/cpu/index.htm
 ; http://www.nasm.us/doc/nasmdoc0.html
 ; http://www.ctyme.com/intr/int-10.htm
 ; http://www.theasciicode.com.ar/
@@ -52,9 +53,28 @@ show_stack_card:
 
 	mov ax, first_card		; Card with the index
 	add ax, bx
-print_card:
+
 	pusha
 
+	mov cl, byte [eax]
+	bt cx, 7
+	jc print_shown_card
+
+print_hidden_card:
+	; Set cursor position
+	mov ah, 02h		; Set cursor position
+	xor bh, bh		; Page number 0
+	mov bl, byte 7d
+	int 10h
+
+	mov al, byte '-'
+	mov ah, 0eh		; Teletype output
+	int 10h
+	int 10h
+
+	jmp finished_printing
+
+print_shown_card:
 	; Fetch the card value
 	mov cl, byte [eax+1]
 	and cx, 000fh
@@ -82,9 +102,8 @@ print_card:
 	mov ah, 0eh		; Teletype output
 	int 10h
 
+finished_printing:
 	popa
-
-; Finished printing card
 
 	cmp cl, 7h			; Are we at the bottom left pile?
 	jl dumpstack_nextcard		; Only increment the cursor row if on the bottom row
@@ -180,7 +199,8 @@ perform_move_command:
 
 	pop bx				; Old ax; card moved from source pile
 
-	mov [first_card+eax], byte bl		; Set the next pointer to the card that was moved
+	or bl, 10000000b;		; Ensure the previous card is shown
+	mov [first_card+eax], byte bl	; Set the next pointer to the card that was moved
 	ret
 
 ; ---------------------------------------------------------------------------
