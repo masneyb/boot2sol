@@ -93,8 +93,8 @@ For example: You can press `mnzk` to move the last card on pile n (bottom right)
 The compiled binary is currently at 509 bytes, with only one extra usable byte
 remaining. Additional features and validations will require optimizing the assembly
 code even more to save a few bytes here and there. One possible change to free up a
-sizable chunk of space is to simplify the card data structure from 2 bytes to 1 byte
-using this layout:
+sizable chunk of space is to reduce the card data structure from 2 bytes to 1 byte
+using this data structure:
 
 Shown | Unused | Offset to next card
 ------|--------|--------------------
