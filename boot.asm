@@ -12,7 +12,7 @@
 						; to reduce the binary size by a byte.
 						; (Yes, space is that tight.)
 
-%define end_of_pile		01111111b
+%define end_of_pile		00111111b
 %define pile_next_ptr_mask	end_of_pile
 
 %define draw_down_pile_number   0
@@ -54,12 +54,12 @@ show_stack_card:
 	cmp bl, end_of_pile		; At end of pile?
 	je nextstack
 
-	mov ax, [first_card+ebx]	; Current card
+	xor ah, ah			; Load card
+	mov al, byte [first_card+ebx]
 
 	pusha
 
-	mov cl, al
-	bt cx, 7
+	bt ax, 7
 	jc print_shown_card
 
 print_hidden_card:
@@ -78,26 +78,31 @@ print_hidden_card:
 	jmp finished_printing
 
 print_shown_card:
-	; Fetch the card value
-	mov cl, ah
-	and cx, 000fh
-	push cx				; Save the current card value
+	push dx		; Save current cursor position
+	; Look up the card value and family by dividing the current pointer by 13
+	; pointer / 13 = family
+	; pointer mod 13 = card value
+	mov dx, 0
+	mov ax, bx	; Load current card offset
+	mov bx, 13	; Number of cards in a family
+	div bx		; al has card family, ah has card value
 
-	; Fetch the card family
-	mov cl, ah
-	shr cl, 6d
-	xor ch, ch
+	mov bx, dx	; Current card value
+	mov cx, ax	; Current card family
+	pop dx		; Restore cursor position
+
+	push bx		; Save current card value
 
 	; Set cursor position
-	mov ah, 02h		; Set cursor position
-	xor bh, bh		; Page number 0
+	mov ah, 02h	; Set cursor position
+	xor bh, bh	; Page number 0
 	mov bl, byte [family_colors+ecx]
 	int 10h
 
 	; Display the card value...
-	pop ax				; Get the previously saved card value
-	mov al, byte [card_values+eax-1]
-	mov ah, 0eh		; Teletype output
+	pop ax		; Get the previously saved card value
+	mov al, byte [card_values+eax]
+	mov ah, 0eh	; Teletype output
 	int 10h
 
 	; And the card family symbol...
@@ -113,7 +118,7 @@ finished_printing:
 	add dh,2d			; Increment cursor row only on bottom row
 
 dumpstack_nextcard:
-	mov bl, al			; Update next card pointer
+	mov bx, ax			; Update next card pointer
 	jmp show_stack_card
 
 nextstack:
@@ -294,86 +299,81 @@ move_command:
 	family_colors db 7d, 7d, 4d, 4d
 	family_symbols db 'CSDH'
 
-	; Family - 2 bits
-	; - 1 1 hearts
-	; - 1 0 diamond
-	; - 0 1 spades
-	; - 0 0 clubs
-	; - First bit is the color (1=black, 0=red)
-	; Unused - 2 bits
-	; Card - 4 bits
-	; - A=1, 2, 3-10, J=11, Q=12, K=13
-
 	; Shown? - 1 bit
-	; Pointer to next - 7 bits - 0xff - end of list
+	; Unused
+	; Pointer to next - 6 bits - 111111b - end of list
+	; The pointer to next is used to calculate the card value and card family
+	; - pointer / 13 = family
+	; - pointer mod 13 = value
 
-	first_card dw 11_0_0_1011_0_0000010b ; JH  - Top of deck stack - 0000000
-	dw 01_0_0_0011_0_0000100b ; 3S  - 0000010
-	dw 01_0_0_1000_0_0000110b ; 8S  - 0000100
-	dw 10_0_0_0011_0_0001000b ; 3D  - 0000110
-	dw 10_0_0_1011_0_0001010b ; JD  - 0001000
-	dw 10_0_0_0101_0_0001100b ; 5D  - 0001010
-	dw 01_0_0_0100_0_0001110b ; 4S  - 0001100
-	dw 11_0_0_0101_0_0010000b ; 5H  - 0001110
-	dw 10_0_0_1101_0_0010010b ; KD  - 0010000
-	dw 00_0_0_1101_0_0010100b ; KC  - 0010010
-	dw 10_0_0_1000_0_0010110b ; 8D  - 0010100
-	dw 11_0_0_0100_0_0011000b ; 4H  - 0010110
-	dw 00_0_0_0011_0_0011010b ; 3C  - 0011000
-	dw 10_0_0_0111_0_0011100b ; 7D  - 0011010
-	dw 00_0_0_1010_0_0011110b ; TC  - 0011100
-	dw 10_0_0_1010_0_0100000b ; TD  - 0011110
-	dw 11_0_0_1100_0_0100010b ; QH  - 0100000
-	dw 00_0_0_1001_0_0100100b ; 9C  - 0100010
-	dw 00_0_0_1000_0_0100110b ; 8C  - 0100100
-	dw 11_0_0_1001_0_0101000b ; 9H  - 0100110
-	dw 01_0_0_0101_0_0101010b ; 5S  - 0101000
-	dw 00_0_0_1011_0_0101100b ; JC  - 0101010
-	dw 01_0_0_0001_1_1111111b ; AS+ - 0101100
-	dw 00_0_0_1100_1_1111111b ; QC+ - Drawn card - 0101110
-	dw 00_0_0_0101_1_1111111b ; 5C+ - Beginning of stack 7 - 0110000
-	dw 01_0_0_1010_0_0110100b ; TS  - Beginning of stack 8 - 0110010
-	dw 11_0_0_0110_1_1111111b ; 6H+ - 0110100
-	dw 11_0_0_1101_0_0111000b ; KH  - Beginning of stack 9 - 0110110
-	dw 11_0_0_0011_0_0111010b ; 3H  - 0111000
-	dw 01_0_0_1011_1_1111111b ; JS+ - 0111010
-	dw 00_0_0_0110_0_0111110b ; 6C  - Beginning of stack 10 - 0111100
-	dw 10_0_0_0010_0_1000000b ; 2D  - 0111110
-	dw 01_0_0_1101_0_1000010b ; KS  - 1000000
-	dw 10_0_0_0001_1_1111111b ; AD+ - 1000010
-	dw 01_0_0_0111_0_1000110b ; 7S  - Beginning of stack 11 - 1000100
-	dw 11_0_0_1010_0_1001000b ; TH  - 1000110
-	dw 00_0_0_0100_0_1001010b ; 4C  - 1001000
-	dw 10_0_0_0110_0_1001100b ; 6D  - 1001010
-	dw 10_0_0_0100_1_1111111b ; 4D+ - 1001100
-	dw 01_0_0_0010_0_1010000b ; 2S  - Beginning of stack 12 - 1001110
-	dw 10_0_0_1100_0_1010010b ; QD  - 1010000
-	dw 11_0_0_0001_0_1010100b ; AH  - 1010010
-	dw 10_0_0_1001_0_1010110b ; 9D  - 1010100
-	dw 11_0_0_1000_0_1011000b ; 8H  - 1010110
-	dw 00_0_0_0001_1_1111111b ; AC+ - 1011000
-	dw 00_0_0_0111_0_1011100b ; 7C  - Beginning of stack 13 - 1011010
-	dw 11_0_0_0010_0_1011110b ; 2H  - 1011100
-	dw 11_0_0_0111_0_1100000b ; 7H  - 1011110
-	dw 01_0_0_1100_0_1100010b ; QS  - 1100000
-	dw 00_0_0_0010_0_1100100b ; 2C  - 1100010
-	dw 01_0_0_0110_0_1100110b ; 6S  - 1100100
-	dw 01_0_0_1001_1_1111111b ; 9S+ - 1100110
+	first_card	db 0_0_010001b ; Current Position=000000, Current Card=AC, Next Card=5S
+	db 0_0_100111b ; Current Position=000001, Current Card=2C, Next Card=AH
+	db 0_0_011000b ; Current Position=000010, Current Card=3C, Next Card=QS
+	db 0_0_011101b ; Current Position=000011, Current Card=4C, Next Card=4D
+	db 0_0_001110b ; Current Position=000100, Current Card=5C, Next Card=2S
+	db 0_0_010111b ; Current Position=000101, Current Card=6C, Next Card=JS
+	db 0_0_001111b ; Current Position=000110, Current Card=7C, Next Card=3S
+	db 0_0_011100b ; Current Position=000111, Current Card=8C, Next Card=3D
+	db 0_0_010101b ; Current Position=001000, Current Card=9C, Next Card=9S
+	db 0_0_000111b ; Current Position=001001, Current Card=TC, Next Card=8C
+	db 0_0_000100b ; Current Position=001010, Current Card=JC, Next Card=5C
+	db 0_0_110010b ; Current Position=001011, Current Card=QC, Next Card=QH
+	db 1_0_111111b ; Current Position=001100, Current Card=KC, Next Card=End of Pile, Shown
+	db 0_0_000110b ; Current Position=001101, Current Card=AS, Next Card=7C
+	db 1_0_111111b ; Current Position=001110, Current Card=2S, Next Card=End of Pile, Shown
+	db 0_0_100000b ; Current Position=001111, Current Card=3S, Next Card=7D
+	db 0_0_001001b ; Current Position=010000, Current Card=4S, Next Card=TC
+	db 0_0_010011b ; Current Position=010001, Current Card=5S, Next Card=7S
+	db 0_0_100100b ; Current Position=010010, Current Card=6S, Next Card=JD
+	db 1_0_111111b ; Current Position=010011, Current Card=7S, Next Card=End of Pile, Shown
+	db 0_0_110000b ; Current Position=010100, Current Card=8S, Next Card=TH
+	db 0_0_011011b ; Current Position=010101, Current Card=9S, Next Card=2D
+	db 0_0_011111b ; Current Position=010110, Current Card=TS, Next Card=6D
+	db 0_0_110001b ; Current Position=010111, Current Card=JS, Next Card=JH
+	db 0_0_000000b ; Current Position=011000, Current Card=QS, Next Card=AC
+	db 0_0_000001b ; Current Position=011001, Current Card=KS, Next Card=2C
+	db 0_0_010010b ; Current Position=011010, Current Card=AD, Next Card=6S
+	db 0_0_001011b ; Current Position=011011, Current Card=2D, Next Card=QC
+	db 0_0_010100b ; Current Position=011100, Current Card=3D, Next Card=8S
+	db 0_0_110011b ; Current Position=011101, Current Card=4D, Next Card=KH
+	db 0_0_001101b ; Current Position=011110, Current Card=5D, Next Card=AS
+	db 0_0_001100b ; Current Position=011111, Current Card=6D, Next Card=KC
+	db 0_0_101111b ; Current Position=100000, Current Card=7D, Next Card=9H
+	db 1_0_111111b ; Current Position=100001, Current Card=8D, Next Card=End of Pile, Shown
+	db 0_0_101010b ; Current Position=100010, Current Card=9D, Next Card=4H
+	db 0_0_111111b ; Current Position=100011, Current Card=TD, Next Card=End of Pile
+	db 0_0_100011b ; Current Position=100100, Current Card=JD, Next Card=TD
+	db 0_0_011110b ; Current Position=100101, Current Card=QD, Next Card=5D
+	db 0_0_101000b ; Current Position=100110, Current Card=KD, Next Card=2H
+	db 0_0_101100b ; Current Position=100111, Current Card=AH, Next Card=6H
+	db 1_0_111111b ; Current Position=101000, Current Card=2H, Next Card=End of Pile, Shown
+	db 1_0_111111b ; Current Position=101001, Current Card=3H, Next Card=End of Pile, Shown
+	db 0_0_101001b ; Current Position=101010, Current Card=4H, Next Card=3H
+	db 0_0_010000b ; Current Position=101011, Current Card=5H, Next Card=4S
+	db 0_0_010110b ; Current Position=101100, Current Card=6H, Next Card=TS
+	db 0_0_001010b ; Current Position=101101, Current Card=7H, Next Card=JC
+	db 1_0_111111b ; Current Position=101110, Current Card=8H, Next Card=End of Pile, Shown
+	db 0_0_011010b ; Current Position=101111, Current Card=9H, Next Card=AD
+	db 1_0_111111b ; Current Position=110000, Current Card=TH, Next Card=End of Pile, Shown
+	db 1_0_111111b ; Current Position=110001, Current Card=JH, Next Card=End of Pile, Shown
+	db 0_0_101011b ; Current Position=110010, Current Card=QH, Next Card=5H
+	db 0_0_000101b ; Current Position=110011, Current Card=KH, Next Card=6C
 
-	pile_pointers db 00000000b
-	db 0101110b
-	db 1111111b
-	db 1111111b
-	db 1111111b
-	db 1111111b
-	db 1111111b
-	db 0110000b
-	db 0110010b
-	db 0110110b
-	db 0111100b
-	db 1000100b
-	db 1001110b
-	db 1011010b
+	pile_pointers	db 100101b ; Card=QD
+	db 101110b ; Card=8H, Shown
+	db 111111b ; Card=End of Pile
+	db 111111b ; Card=End of Pile
+	db 111111b ; Card=End of Pile
+	db 111111b ; Card=End of Pile
+	db 111111b ; Card=End of Pile
+	db 100001b ; Card=8D, Shown
+	db 100110b ; Card=KD
+	db 100010b ; Card=9D
+	db 101101b ; Card=7H
+	db 000010b ; Card=3C
+	db 000011b ; Card=4C
+	db 011001b ; Card=KS
 
 	times 510-($-$$) db 0
 	dw 0AA55h  ; Boot signature
+

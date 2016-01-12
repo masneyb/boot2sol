@@ -49,14 +49,19 @@ implementation. So, boot2sol recognizes a total of 14 piles, zero indexed.
 
 The cards in each pile are represented as a linked list. 14 bytes of data are
 reserved for the head of each pile in the list. The representation of each
-card uses two bytes:
+card uses one byte:
 
-Family | Unused | Card Value | Shown | Offset to next card
--------|--------|------------|-------|-----
-2 bits | 2 bits | 4 bits     | 1 bit | 7 bits
+Shown | Unused | Offset to next card
+------|--------|--------------------
+1 bit | 1 bit  | 6 bits
+
+The offset is used to calculate the card value and family. The cards are stored
+in memory grouped by card family. Inside each family, the cards are ordered ace
+through king. The pointer offset is used to calculate the card value and face.
+Pseudocode: `offset / 13 = family` and `offset mod 13 = card value (ace-king)`.
 
 The end of the linked list in the next pointer is represented with the value
-0x1111111 (7 ones).
+0x111111 (6 ones).
 
 
 ## How to run the game
@@ -86,25 +91,6 @@ by the following table:
  h | i | j | k | l | m | n
 
 For example: You can press `mnzk` to move the last card on pile n (bottom right) to the end of pile k.
-
-
-## Space limitations
-
-The compiled binary is currently at 509 bytes, with only one extra usable byte
-remaining. Additional features and validations will require optimizing the assembly
-code even more to save a few bytes here and there. One possible change to free up a
-sizable chunk of space is to reduce the card data structure from 2 bytes to 1 byte
-using this data structure:
-
-Shown | Unused | Offset to next card
-------|--------|--------------------
-1 bit | 1 bit  | 6 bits
-
-The cards would need to be stored in memory grouped by card family. Inside each
-family, the cards would be ordered ace through king. The pointer offset would
-be used to calculate the card value and face. Pseudocode: `offset / 13 = family`
-and `offset mod 13 = card value (ace-king)`. See the family_symbols symbol in the
-source code for the card family ordering.
 
 
 ## Screenshot
