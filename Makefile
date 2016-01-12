@@ -7,7 +7,7 @@ floppy: clean boot
 	dd status=noxfer conv=notrunc if=boot.bin of=floppy.img
 
 run: floppy
-	qemu-system-i386 floppy.img
+	qemu-system-i386 -soundhw all floppy.img
 
 objdump: boot
 	objdump -mi8086 -Mintel -D -b binary boot.bin --adjust-vma 0x7c00
