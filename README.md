@@ -55,9 +55,9 @@ Shown | Unused | Offset to next card
 ------|--------|--------------------
 1 bit | 1 bit  | 6 bits
 
-The offset is used to calculate the card value and family. The cards are stored
-in memory grouped by card family. Inside each family, the cards are ordered ace
-through king. The pointer offset is used to calculate the card value and face.
+The cards are stored in memory grouped by family. Inside each family, the cards
+are ordered ace through king. This allows using the offset in memory to calculate
+the card value and family.
 Pseudocode: `offset / 13 = family` and `offset mod 13 = card value (ace-king)`.
 
 The end of the linked list in the next pointer is represented with the value
