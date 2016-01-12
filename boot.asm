@@ -156,7 +156,7 @@ process_keyboard_input:
 	cmp al, 'm'
 	je move_command
 
-	jmp game_loop
+	jmp game_loop	; Error!
 
 ; ---------------------------------------------------------------------------
 
@@ -287,7 +287,11 @@ move_command:
 
 	call read_keyboard_input
 	xor bh, bh
-	mov bl, al			; Input for perform_move_command: source pile number
+	mov bl, al			; Input for perform_move_command: destination pile number
+
+	; Don't allow moving any cards into the first 3 piles
+	cmp bl, 3
+	jl game_loop			; Error
 
 	call perform_move_command
 
