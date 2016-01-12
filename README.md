@@ -8,7 +8,7 @@ solitaire within the first stage bootloader. The goal is to boot an x86
 PC with a traditional BIOS (no UEFI) into an interactive game of solitaire
 without an operating system. Introduction video:
 
-[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/3hT80P14Tz8/0.jpg)](http://www.youtube.com/watch?v=3hT80P14Tz8)
+[![Introduction Video](http://img.youtube.com/vi/3hT80P14Tz8/0.jpg)](http://www.youtube.com/watch?v=3hT80P14Tz8)
 
 ## Team Members
 * Brian Masney - [masneyb](https://github.com/masneyb)
