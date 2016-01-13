@@ -301,7 +301,7 @@ move_command:
 
 	card_values db 'A23456789TJQK'
 	family_colors db 7d, 7d, 4d, 4d
-	family_symbols db 'CSDH'
+	family_symbols db 5, 6, 4, 3
 
 	; Shown? - 1 bit
 	; Unused
