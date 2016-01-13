@@ -252,15 +252,18 @@ draw_command:
 	mov bx, draw_up_pile_number	; Input for perform_move_command: destination pile number
 	call perform_move_command
 
-	; Set the last card on the first pile to hidden
-	mov al, byte [pile_pointers+draw_down_pile_number]
-	call find_bottom_of_pile
-	and byte [first_card+eax], 00111111b
-
 	; Set the last card on the second pile to shown
 	mov al, byte [pile_pointers+draw_up_pile_number]
 	call find_bottom_of_pile
 	or byte [first_card+eax], 10000000b
+
+	cmp [pile_pointers+draw_down_pile_number], byte end_of_pile
+	je game_loop
+
+	; Set the last card on the first pile to hidden if there are cards
+	mov al, byte [pile_pointers+draw_down_pile_number]
+	call find_bottom_of_pile
+	and byte [first_card+eax], 00111111b
 
 	jmp game_loop
 
